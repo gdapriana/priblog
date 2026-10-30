@@ -8,7 +8,6 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-orm/zod";
 
 const defaultField = {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
