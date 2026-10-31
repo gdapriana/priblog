@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { ApiError } from "../utils/api.error.response.util.js";
@@ -45,7 +46,9 @@ export const errorMiddleware = (
   const response = {
     success: false,
     message,
-    statusCode,
+     statusCode,
+     ...(errors !== undefined && { errors }),
+     ...(process.env.NODE_ENV === "development" && { stack: err.stack })
   };
 
   res.status(statusCode).json(response);

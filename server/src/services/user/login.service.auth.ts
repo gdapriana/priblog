@@ -17,7 +17,7 @@ export const loginServiceAuth = async (
   const { email, password } = z.parse(UserValidation.LOGIN, body);
   const [user] = await db.select().from(users).where(eq(users.email, email));
   if (!user || !(await verify(user.hashedPassword, password)))
-    throw ApiError.unauthorized(AUTH_MESSAGE.UNAUTHORIZED);
+    throw ApiError.badRequest(AUTH_MESSAGE.USER_NOT_FOUND);
   const { hashedPassword: _, ...safeData } = user;
   await createSession(res, user.id, {
     userAgent: req.get("user-agent"),
