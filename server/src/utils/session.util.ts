@@ -12,7 +12,7 @@ const cookieBase: CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
-  path: "/"
+  path: "/",
 };
 
 const hashToken = (token: string) =>
@@ -21,7 +21,7 @@ const hashToken = (token: string) =>
 export function setSessionCookie(
   res: Response,
   token: string,
-  expiresAt: Date
+  expiresAt: Date,
 ) {
   res.cookie(COOKIE_NAME, token, { ...cookieBase, expires: expiresAt });
 }
@@ -33,7 +33,7 @@ export function clearSessionCookie(res: Response) {
 export async function createSession(
   res: Response,
   userId: number,
-  meta?: { userAgent?: string; ipAddress?: string }
+  meta?: { userAgent?: string; ipAddress?: string },
 ) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + DURATION_MS);
@@ -42,7 +42,7 @@ export async function createSession(
     userId,
     expiresAt,
     userAgent: meta?.userAgent,
-    ipAddress: meta?.ipAddress
+    ipAddress: meta?.ipAddress,
   });
   setSessionCookie(res, token, expiresAt);
 }
@@ -55,8 +55,9 @@ export async function validateSession(token: string) {
       user: {
         id: users.id,
         name: users.name,
-        email: users.email
-      }
+        email: users.email,
+        role: users.role,
+      },
     })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))
@@ -82,10 +83,10 @@ export async function validateSession(token: string) {
   return {
     session: {
       ...row.session,
-      expiresAt: renewedExpiresAt ?? row.session.expiresAt
+      expiresAt: renewedExpiresAt ?? row.session.expiresAt,
     },
     user: row.user,
-    renewedExpiresAt
+    renewedExpiresAt,
   };
 }
 

@@ -11,7 +11,7 @@ const SESSION_COUNT = 15;
 async function main() {
   const hashedPassword = await hash("11111111");
 
-   await reset(db, schema);
+  await reset(db, schema);
 
   await seed(db, schema).refine((f) => ({
     users: {
@@ -19,6 +19,7 @@ async function main() {
       columns: {
         name: f.fullName(),
         age: f.int({ minValue: 18, maxValue: 60 }),
+        role: f.default({ defaultValue: "USER" }),
         email: f.email(),
         hashedPassword: f.default({ defaultValue: hashedPassword }),
       },

@@ -2,6 +2,7 @@ import { defineRelations } from "drizzle-orm";
 import {
   index,
   integer,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -19,13 +20,15 @@ const defaultField = {
     .$onUpdate(() => new Date()),
 };
 
+export const userRole = pgEnum("role", ["ADMIN", "USER"]);
+
 export const users = pgTable(
   "users",
   {
     name: varchar({ length: 255 }).notNull(),
-    age: integer().notNull(),
     email: varchar({ length: 255 }).notNull().unique(),
     hashedPassword: text("hashed_password").notNull(),
+    role: userRole("role").default("USER").notNull(),
     ...defaultField,
   },
   (table) => [
@@ -111,6 +114,7 @@ export const relations = defineRelations(
 );
 
 export type User = typeof users.$inferSelect;
+export type UserRole = (typeof userRole.enumValues)[number];
 export type Blog = typeof blogs.$inferSelect;
 export type Category = typeof blogs.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
@@ -118,3 +122,6 @@ export type InsertUser = typeof users.$inferInsert;
 export type InsertBlog = typeof blogs.$inferInsert;
 export type InsertCategory = typeof blogs.$inferInsert;
 export type InsertSession = typeof sessions.$inferInsert;
+
+export type UserRegisterResponse = Omit<User, "hashedPassword">;
+export type UserLoginResponse = Omit<User, "hashedPassword">;

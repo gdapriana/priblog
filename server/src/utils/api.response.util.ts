@@ -21,7 +21,7 @@ export class ApiResponse<T = unknown> {
     message,
     statusCode,
     data,
-    errors
+    errors,
   }: ApiResponseParams<T>) {
     this.success = success;
     this.message = message;
@@ -36,7 +36,7 @@ export class ApiResponse<T = unknown> {
       message: this.message,
       statusCode: this.statusCode,
       ...(this.data !== undefined && { data: this.data }),
-      ...(this.errors !== undefined && { errors: this.errors })
+      ...(this.errors !== undefined && { errors: this.errors }),
     });
   }
 
@@ -44,13 +44,13 @@ export class ApiResponse<T = unknown> {
     res: Response,
     message: string,
     data?: T,
-    statusCode: StatusCode = STATUS_CODES.OK
+    statusCode: StatusCode = STATUS_CODES.OK,
   ): Response {
     return new ApiResponse<T>({
       success: true,
       message,
       data,
-      statusCode
+      statusCode,
     }).send(res);
   }
 

@@ -11,7 +11,7 @@ export const API_MESSAGE = {
   CONFLICT: "Resource already exists",
   TOO_MANY_REQUESTS: "Too many requests, please try again later",
   INTERNAL_SERVER_ERROR: "Something went wrong, please try again later",
-  SERVICE_UNAVAILABLE: "Service temporarily unavailable"
+  SERVICE_UNAVAILABLE: "Service temporarily unavailable",
 } as const;
 
 export const CRUD_MESSAGE = {
@@ -25,7 +25,7 @@ export const CRUD_MESSAGE = {
   createFailed: (resource: string) => `Failed to create ${resource}`,
   updateFailed: (resource: string) => `Failed to update ${resource}`,
   deleteFailed: (resource: string) => `Failed to delete ${resource}`,
-  fetchFailed: (resource: string) => `Failed to fetch ${resource}`
+  fetchFailed: (resource: string) => `Failed to fetch ${resource}`,
 } as const;
 
 export const AUTH_MESSAGE = {
@@ -51,5 +51,5 @@ export const AUTH_MESSAGE = {
   ACCOUNT_DISABLED: "Your account has been disabled",
   USER_NOT_FOUND: "User not found",
   PASSWORD_MISMATCH: "Passwords do not match",
-  OLD_PASSWORD_INCORRECT: "Old password is incorrect"
+  OLD_PASSWORD_INCORRECT: "Old password is incorrect",
 } as const;
