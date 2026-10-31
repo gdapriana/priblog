@@ -46,9 +46,9 @@ export const errorMiddleware = (
   const response = {
     success: false,
     message,
-     statusCode,
-     ...(errors !== undefined && { errors }),
-     ...(process.env.NODE_ENV === "development" && { stack: err.stack })
+    statusCode,
+    ...(errors !== undefined && { errors }),
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   };
 
   res.status(statusCode).json(response);

@@ -1,6 +1,7 @@
 import express, { type Request, type Response } from "express";
 import { apiReference } from "@scalar/express-api-reference";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import openApiDocument from "./utils/openapi.json" with { type: "json" };
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import { notFoundMiddleware } from "./middlewares/not.found.middleware.js";
@@ -9,6 +10,7 @@ import setupRoutes from "./routes/setup.route.js";
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: ["http://localhost:3000"],

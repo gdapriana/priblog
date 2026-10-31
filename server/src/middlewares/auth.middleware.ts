@@ -7,6 +7,7 @@ import {
   validateSession,
 } from "../utils/session.util.js";
 import { STATUS_CODES } from "../constants/status.code.constant.js";
+import { AUTH_MESSAGE } from "../constants/status.message.constant.js";
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -49,12 +50,13 @@ export const requireAuth = (
   res: Response,
   next: NextFunction,
 ) => {
-  if (!req.user)
+  if (!req.user) {
     return res.status(STATUS_CODES.UNAUTHORIZED).json({
       success: false,
-      message: "UNAUTHORIZED",
+      message: AUTH_MESSAGE.UNAUTHORIZED,
       statusCode: STATUS_CODES.UNAUTHORIZED,
     });
+  }
   next();
 };
 
