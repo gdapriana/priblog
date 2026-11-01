@@ -116,14 +116,21 @@ export const relations = defineRelations(
 export type User = typeof users.$inferSelect;
 export type UserRole = (typeof userRole.enumValues)[number];
 export type Blog = typeof blogs.$inferSelect;
-export type Category = typeof blogs.$inferSelect;
+export type Category = typeof categories.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type InsertBlog = typeof blogs.$inferInsert;
-export type InsertCategory = typeof blogs.$inferInsert;
+export type InsertCategory = typeof categories.$inferInsert;
 export type InsertSession = typeof sessions.$inferInsert;
 
 export type UserRegisterResponse = Omit<User, "hashedPassword">;
 export type UserLoginResponse = Omit<User, "hashedPassword">;
 export type UserLogoutResponse = Pick<User, "id">;
 export type UserMeResponse = Pick<User, "id" | "name" | "email" | "role">;
+
+export type QueryResponse<T> = {
+   items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  totalData?: number;
+};
