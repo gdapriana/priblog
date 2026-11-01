@@ -1,6 +1,8 @@
 import z from "zod";
 
-export const queryValidation = <const T extends readonly [string, ...string[]]>({
+export const queryValidation = <
+  const T extends readonly [string, ...string[]],
+>({
   sortEnum,
 }: {
   sortEnum: T;
@@ -17,8 +19,6 @@ export const getValidation = ({ by }: { by: string[] }) =>
     value: z.string(),
   });
 
-export const deleteValidation = ({ by }: { by: string[] }) =>
-  z.object({
-    by: z.enum(by),
-    value: z.coerce.number(),
-  });
+export const deleteValidation = z.object({
+  id: z.coerce.number(),
+});

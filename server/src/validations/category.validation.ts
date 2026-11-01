@@ -7,17 +7,23 @@ import {
 import { createInsertSchema, createUpdateSchema } from "drizzle-orm/zod";
 import { categories } from "../db/schema.js";
 
-
 export class CategoryValidation {
-   static QUERY = z.object({
-     search: z.string().trim().min(1).max(200).optional(),
-     withTotal: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
-     ...queryValidation({ sortEnum: ["id", "title", "createdAt"] }),
-   });
+  static QUERY = z.object({
+    search: z.string().trim().min(1).max(200).optional(),
+    withTotal: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
+    ...queryValidation({ sortEnum: ["id", "title", "createdAt"] }),
+  });
   static GET = getValidation({ by: ["id", "slug"] });
-  static CREATE = createInsertSchema(categories);
-  static UPDATE = createUpdateSchema(categories);
-  static DELETE = deleteValidation({ by: ["id"] });
+  static CREATE = createInsertSchema(categories).strict();
+  static UPDATE = createUpdateSchema(categories).extend({
+    id: z.coerce.number(),
+  });
+  static DELETE = deleteValidation;
 }
 
-export type CategoryValidationCreate = z.infer<typeof CategoryValidation.CREATE>
+export type CategoryValidationCreate = z.infer<
+  typeof CategoryValidation.CREATE
+>;

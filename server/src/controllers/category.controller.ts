@@ -24,4 +24,34 @@ export class CategoryController {
       next(e);
     }
   };
+
+  static CREATE = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await CategoryService.CREATE(req.body);
+      ApiResponse.Success(res, CRUD_MESSAGE.created(this.SCHEMA), result);
+    } catch (e) {
+      next(e);
+    }
+  };
+  static UPDATE = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await CategoryService.UPDATE({
+        id: req.params.categoryId as string,
+        body: req.body,
+      });
+      ApiResponse.Success(res, CRUD_MESSAGE.updated(this.SCHEMA), result);
+    } catch (e) {
+      next(e);
+    }
+  };
+  static DELETE = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await CategoryService.DELETE({
+        id: req.params.categoryId as string,
+      });
+      ApiResponse.Success(res, CRUD_MESSAGE.deleted(this.SCHEMA), result);
+    } catch (e) {
+      next(e);
+    }
+  };
 }

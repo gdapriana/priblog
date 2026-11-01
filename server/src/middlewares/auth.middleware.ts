@@ -8,6 +8,8 @@ import {
 } from "../utils/session.util.js";
 import { STATUS_CODES } from "../constants/status.code.constant.js";
 import { AUTH_MESSAGE } from "../constants/status.message.constant.js";
+import { ApiResponse } from "../utils/api.response.util.js";
+import { ApiError } from "../utils/api.error.response.util.js";
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -62,9 +64,9 @@ export const requireAuth = (
 
 export const requireRole = (roles: UserRole[]) => {
   return (req: Request, _res: Response, next: NextFunction) => {
-    if (!req.user) return next();
-
-    if (!roles.includes(req.user.role)) return next();
+    if (!req.user) throw ApiError.unauthorized(AUTH_MESSAGE.UNAUTHORIZED);
+    if (!roles.includes(req.user.role))
+      throw ApiError.unauthorized(AUTH_MESSAGE.UNAUTHORIZED);
     next();
   };
 };

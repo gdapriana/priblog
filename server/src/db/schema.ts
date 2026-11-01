@@ -128,8 +128,12 @@ export type UserLoginResponse = Omit<User, "hashedPassword">;
 export type UserLogoutResponse = Pick<User, "id">;
 export type UserMeResponse = Pick<User, "id" | "name" | "email" | "role">;
 
+export type CategoryCreateResponse = Pick<Category, "id">;
+export type CategoryUpdateResponse = Pick<Category, "id">;
+export type CategoryDeleteResponse = Pick<Category, "id">;
+
 export type QueryResponse<T> = {
-   items: T[];
+  items: T[];
   nextCursor: string | null;
   hasMore: boolean;
   totalData?: number;

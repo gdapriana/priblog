@@ -1,17 +1,11 @@
 import z from "zod";
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  ilike,
-  lt,
-  or,
-} from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, ilike, lt, or } from "drizzle-orm";
 import db from "../../configs/db.js";
-import { categories, type Category, type QueryResponse } from "../../db/schema.js";
+import {
+  categories,
+  type Category,
+  type QueryResponse,
+} from "../../db/schema.js";
 import { CategoryValidation } from "../../validations/category.validation.js";
 import { ApiError } from "../../utils/api.error.response.util.js";
 
@@ -96,7 +90,7 @@ export const queryServiceCategory = async (
       .where(and(searchCondition, cursorCondition))
       .orderBy(direction(sortColumn), direction(categories.id))
       .limit(take + 1),
-     withTotal && !cursor
+    withTotal && !cursor
       ? db.select({ total: count() }).from(categories).where(searchCondition)
       : null,
   ]);
