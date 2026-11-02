@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Priblog",
-    "description": "REST API Priblog: autentikasi berbasis sesi (cookie), blog, dan kategori.\n\nSemua respons memakai format envelope `{ success, message, statusCode, data?, errors? }`. Autentikasi memakai cookie `session` (httpOnly) yang diset saat login.",
+    "description": "Priblog REST API: cookie-based session authentication, blogs, and categories.\n\nAll responses use the envelope format `{ success, message, statusCode, data?, errors? }`. Authentication uses the `session` cookie (httpOnly) that is set on login.",
     "version": "1.0.0"
   },
   "servers": [
@@ -14,22 +14,22 @@
   "tags": [
     {
       "name": "Auth",
-      "description": "Registrasi, login, logout, dan profil user"
+      "description": "Registration, login, logout, and user profile"
     },
     {
       "name": "Categories",
-      "description": "Kategori blog. Operasi tulis hanya untuk ADMIN"
+      "description": "Blog categories. Write operations are ADMIN only"
     },
     {
       "name": "Blogs",
-      "description": "Blog. Operasi tulis butuh login dan hanya pemilik yang boleh mengubah/menghapus"
+      "description": "Blogs. Write operations require login, and only the owner can update or delete"
     }
   ],
   "paths": {
     "/auth/register": {
       "post": {
         "tags": ["Auth"],
-        "summary": "Registrasi user baru",
+        "summary": "Register a new user",
         "operationId": "authRegister",
         "requestBody": {
           "required": true,
@@ -46,7 +46,7 @@
         },
         "responses": {
           "200": {
-            "description": "Registrasi berhasil",
+            "description": "Registration successful",
             "content": {
               "application/json": {
                 "schema": {
@@ -73,7 +73,7 @@
       "post": {
         "tags": ["Auth"],
         "summary": "Login",
-        "description": "Jika berhasil, server mengirim cookie `session` (httpOnly, sameSite=lax, berlaku 30 hari dan diperpanjang otomatis).",
+        "description": "On success, the server sets the `session` cookie (httpOnly, sameSite=lax, valid for 30 days and renewed automatically).",
         "operationId": "authLogin",
         "requestBody": {
           "required": true,
@@ -86,10 +86,10 @@
         },
         "responses": {
           "200": {
-            "description": "Login berhasil",
+            "description": "Login successful",
             "headers": {
               "Set-Cookie": {
-                "description": "Cookie sesi `session=<token>; HttpOnly; Path=/; SameSite=Lax`",
+                "description": "Session cookie `session=<token>; HttpOnly; Path=/; SameSite=Lax`",
                 "schema": { "type": "string" }
               }
             },
@@ -110,7 +110,7 @@
             }
           },
           "400": {
-            "description": "Body tidak valid, atau email/password salah",
+            "description": "Invalid body, or wrong email/password",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
@@ -125,11 +125,11 @@
       "delete": {
         "tags": ["Auth"],
         "summary": "Logout",
-        "description": "Menghapus sesi di server dan membersihkan cookie `session`. Aman dipanggil walau belum login.",
+        "description": "Deletes the session on the server and clears the `session` cookie. Safe to call even when not logged in.",
         "operationId": "authLogout",
         "responses": {
           "200": {
-            "description": "Logout berhasil",
+            "description": "Logout successful",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/SuccessEnvelope" }
@@ -143,12 +143,12 @@
     "/auth/me": {
       "get": {
         "tags": ["Auth"],
-        "summary": "Profil user yang sedang login",
+        "summary": "Current logged-in user profile",
         "operationId": "authMe",
         "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "Data user saat ini",
+            "description": "Current user data",
             "content": {
               "application/json": {
                 "schema": {
@@ -173,8 +173,8 @@
     "/categories/query": {
       "get": {
         "tags": ["Categories"],
-        "summary": "Daftar kategori (cursor pagination)",
-        "description": "Pencarian pada `title` dan `slug` (tidak case sensitive). Urutan selalu memakai `id` sebagai tie-breaker. `nextCursor` dipakai apa adanya sebagai parameter `cursor` berikutnya. `totalData` hanya dikirim jika `withTotal=true` dan `cursor` tidak diisi.",
+        "summary": "List categories (cursor pagination)",
+        "description": "Searches `title` and `slug` (case-insensitive). Ordering always uses `id` as a tie-breaker. Pass `nextCursor` as-is as the next `cursor` parameter. `totalData` is only returned when `withTotal=true` and `cursor` is not set.",
         "operationId": "categoryQuery",
         "parameters": [
           { "$ref": "#/components/parameters/Search" },
@@ -186,7 +186,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Daftar kategori",
+            "description": "List of categories",
             "content": {
               "application/json": {
                 "schema": {
@@ -211,7 +211,7 @@
     "/categories/get": {
       "get": {
         "tags": ["Categories"],
-        "summary": "Ambil satu kategori berdasarkan id atau slug",
+        "summary": "Get a single category by id or slug",
         "operationId": "categoryGet",
         "parameters": [
           { "$ref": "#/components/parameters/GetBy" },
@@ -219,7 +219,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Kategori ditemukan",
+            "description": "Category found",
             "content": {
               "application/json": {
                 "schema": {
@@ -245,8 +245,8 @@
     "/categories": {
       "post": {
         "tags": ["Categories"],
-        "summary": "Buat kategori (ADMIN)",
-        "description": "Slug dibuat otomatis dari `title`. Body bersifat strict: properti di luar schema ditolak.",
+        "summary": "Create a category (ADMIN)",
+        "description": "The slug is generated automatically from `title`. The body is strict: properties outside the schema are rejected.",
         "operationId": "categoryCreate",
         "security": [{ "cookieAuth": [] }],
         "requestBody": {
@@ -254,13 +254,13 @@
           "content": {
             "application/json": {
               "schema": { "$ref": "#/components/schemas/CategoryCreateBody" },
-              "example": { "title": "Teknologi" }
+              "example": { "title": "Technology" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Kategori dibuat",
+            "description": "Category created",
             "content": {
               "application/json": {
                 "schema": {
@@ -290,14 +290,14 @@
           "name": "categoryId",
           "in": "path",
           "required": true,
-          "description": "ID kategori",
+          "description": "Category ID",
           "schema": { "type": "integer" }
         }
       ],
       "patch": {
         "tags": ["Categories"],
-        "summary": "Ubah kategori (ADMIN)",
-        "description": "Semua field opsional. Jika `title` dikirim, slug dibuat ulang dari title baru.",
+        "summary": "Update a category (ADMIN)",
+        "description": "All fields are optional. If `title` is sent, the slug is regenerated from the new title.",
         "operationId": "categoryUpdate",
         "security": [{ "cookieAuth": [] }],
         "requestBody": {
@@ -305,13 +305,13 @@
           "content": {
             "application/json": {
               "schema": { "$ref": "#/components/schemas/CategoryUpdateBody" },
-              "example": { "title": "Teknologi dan Sains" }
+              "example": { "title": "Technology and Science" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Kategori diubah",
+            "description": "Category updated",
             "content": {
               "application/json": {
                 "schema": {
@@ -336,12 +336,12 @@
       },
       "delete": {
         "tags": ["Categories"],
-        "summary": "Hapus kategori (ADMIN)",
+        "summary": "Delete a category (ADMIN)",
         "operationId": "categoryDelete",
         "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "Kategori dihapus",
+            "description": "Category deleted",
             "content": {
               "application/json": {
                 "schema": {
@@ -368,8 +368,8 @@
     "/blogs/query": {
       "get": {
         "tags": ["Blogs"],
-        "summary": "Daftar blog (cursor pagination)",
-        "description": "Pencarian pada `title` dan `slug`. Setiap item menyertakan `category` dan `user` (bisa `null`). `userId` memfilter blog milik satu user. `totalData` hanya dikirim jika `withTotal=true` dan `cursor` tidak diisi.",
+        "summary": "List blogs (cursor pagination)",
+        "description": "Searches `title` and `slug`. Each item includes `category` and `user` (may be `null`). `userId` filters blogs owned by a single user. `totalData` is only returned when `withTotal=true` and `cursor` is not set.",
         "operationId": "blogQuery",
         "parameters": [
           { "$ref": "#/components/parameters/Search" },
@@ -377,7 +377,7 @@
             "name": "userId",
             "in": "query",
             "required": false,
-            "description": "Hanya tampilkan blog milik user ini",
+            "description": "Only return blogs owned by this user",
             "schema": { "type": "integer" }
           },
           { "$ref": "#/components/parameters/WithTotal" },
@@ -388,7 +388,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Daftar blog",
+            "description": "List of blogs",
             "content": {
               "application/json": {
                 "schema": {
@@ -413,7 +413,7 @@
     "/blogs/get": {
       "get": {
         "tags": ["Blogs"],
-        "summary": "Ambil satu blog berdasarkan id atau slug",
+        "summary": "Get a single blog by id or slug",
         "operationId": "blogGet",
         "parameters": [
           { "$ref": "#/components/parameters/GetBy" },
@@ -421,7 +421,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Blog ditemukan",
+            "description": "Blog found",
             "content": {
               "application/json": {
                 "schema": {
@@ -447,8 +447,8 @@
     "/blogs": {
       "post": {
         "tags": ["Blogs"],
-        "summary": "Buat blog",
-        "description": "Pemilik blog (`userId`) diambil dari sesi login, dan slug dibuat otomatis dari `title`. Body bersifat strict: properti di luar schema ditolak.",
+        "summary": "Create a blog",
+        "description": "The blog owner (`userId`) is taken from the login session, and the slug is generated automatically from `title`. The body is strict: properties outside the schema are rejected.",
         "operationId": "blogCreate",
         "security": [{ "cookieAuth": [] }],
         "requestBody": {
@@ -457,9 +457,9 @@
             "application/json": {
               "schema": { "$ref": "#/components/schemas/BlogCreateBody" },
               "example": {
-                "title": "Belajar Drizzle ORM",
-                "excerpt": "Ringkasan singkat",
-                "content": "Isi lengkap blog...",
+                "title": "Learning Drizzle ORM",
+                "excerpt": "Short summary",
+                "content": "Full blog content...",
                 "categoryId": 1
               }
             }
@@ -467,7 +467,7 @@
         },
         "responses": {
           "200": {
-            "description": "Blog dibuat",
+            "description": "Blog created",
             "content": {
               "application/json": {
                 "schema": {
@@ -497,14 +497,14 @@
           "name": "blogId",
           "in": "path",
           "required": true,
-          "description": "ID blog",
+          "description": "Blog ID",
           "schema": { "type": "integer" }
         }
       ],
       "patch": {
         "tags": ["Blogs"],
-        "summary": "Ubah blog (hanya pemilik)",
-        "description": "Semua field opsional. Jika `title` dikirim, slug dibuat ulang. Mengembalikan 403 jika blog bukan milik user yang login.",
+        "summary": "Update a blog (owner only)",
+        "description": "All fields are optional. If `title` is sent, the slug is regenerated. Returns 403 if the blog does not belong to the logged-in user.",
         "operationId": "blogUpdate",
         "security": [{ "cookieAuth": [] }],
         "requestBody": {
@@ -512,13 +512,13 @@
           "content": {
             "application/json": {
               "schema": { "$ref": "#/components/schemas/BlogUpdateBody" },
-              "example": { "title": "Judul baru", "excerpt": "Ringkasan baru" }
+              "example": { "title": "New title", "excerpt": "New summary" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Blog diubah",
+            "description": "Blog updated",
             "content": {
               "application/json": {
                 "schema": {
@@ -544,13 +544,13 @@
       },
       "delete": {
         "tags": ["Blogs"],
-        "summary": "Hapus blog (hanya pemilik)",
-        "description": "Mengembalikan 403 jika blog bukan milik user yang login.",
+        "summary": "Delete a blog (owner only)",
+        "description": "Returns 403 if the blog does not belong to the logged-in user.",
         "operationId": "blogDelete",
         "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "Blog dihapus",
+            "description": "Blog deleted",
             "content": {
               "application/json": {
                 "schema": {
@@ -582,7 +582,7 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "session",
-        "description": "Cookie sesi yang diset oleh `POST /auth/login`"
+        "description": "Session cookie set by `POST /auth/login`"
       }
     },
     "parameters": {
@@ -590,14 +590,14 @@
         "name": "search",
         "in": "query",
         "required": false,
-        "description": "Kata kunci pencarian pada title dan slug",
+        "description": "Search keyword matched against title and slug",
         "schema": { "type": "string", "minLength": 1, "maxLength": 200 }
       },
       "WithTotal": {
         "name": "withTotal",
         "in": "query",
         "required": false,
-        "description": "Sertakan `totalData` (hanya berlaku bila `cursor` kosong)",
+        "description": "Include `totalData` (only applies when `cursor` is empty)",
         "schema": {
           "type": "string",
           "enum": ["true", "false"],
@@ -608,7 +608,7 @@
         "name": "take",
         "in": "query",
         "required": false,
-        "description": "Jumlah item per halaman",
+        "description": "Number of items per page",
         "schema": {
           "type": "integer",
           "minimum": 1,
@@ -620,14 +620,14 @@
         "name": "cursor",
         "in": "query",
         "required": false,
-        "description": "Nilai `nextCursor` dari respons sebelumnya. Cursor yang rusak menghasilkan 400",
+        "description": "The `nextCursor` value from the previous response. A malformed cursor returns 400",
         "schema": { "type": "string", "maxLength": 500 }
       },
       "SortBy": {
         "name": "sortBy",
         "in": "query",
         "required": false,
-        "description": "Kolom pengurutan",
+        "description": "Sort column",
         "schema": {
           "type": "string",
           "enum": ["id", "title", "createdAt"],
@@ -638,7 +638,7 @@
         "name": "orderBy",
         "in": "query",
         "required": false,
-        "description": "Arah pengurutan",
+        "description": "Sort direction",
         "schema": {
           "type": "string",
           "enum": ["desc", "asc"],
@@ -649,20 +649,20 @@
         "name": "by",
         "in": "query",
         "required": true,
-        "description": "Kolom pencarian",
+        "description": "Lookup column",
         "schema": { "type": "string", "enum": ["id", "slug"] }
       },
       "GetValue": {
         "name": "value",
         "in": "query",
         "required": true,
-        "description": "Nilai id (angka) atau slug sesuai `by`",
+        "description": "The id (number) or slug, depending on `by`",
         "schema": { "type": "string" }
       }
     },
     "responses": {
       "ValidationError": {
-        "description": "Validasi gagal (body/query/param tidak sesuai schema)",
+        "description": "Validation failed (body/query/param does not match the schema)",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ValidationErrorEnvelope" }
@@ -670,7 +670,7 @@
         }
       },
       "Unauthorized": {
-        "description": "Belum login atau sesi tidak valid",
+        "description": "Not logged in, or the session is invalid",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
@@ -683,7 +683,7 @@
         }
       },
       "UnauthorizedOrNotAdmin": {
-        "description": "Belum login, atau user bukan ADMIN (saat ini server juga memakai 401 untuk role yang tidak sesuai)",
+        "description": "Not logged in, or the user is not an ADMIN (the server currently also uses 401 for a mismatched role)",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
@@ -696,7 +696,7 @@
         }
       },
       "Forbidden": {
-        "description": "Tidak punya izin (bukan pemilik resource)",
+        "description": "No permission (not the resource owner)",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
@@ -709,7 +709,7 @@
         }
       },
       "NotFound": {
-        "description": "Resource tidak ditemukan",
+        "description": "Resource not found",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
@@ -722,7 +722,7 @@
         }
       },
       "Conflict": {
-        "description": "Data sudah ada (email atau slug duplikat)",
+        "description": "Data already exists (duplicate email or slug)",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
@@ -735,7 +735,7 @@
         }
       },
       "InternalServerError": {
-        "description": "Kesalahan server",
+        "description": "Server error",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
@@ -772,7 +772,7 @@
           "errors": {},
           "stack": {
             "type": "string",
-            "description": "Hanya ada bila NODE_ENV=development"
+            "description": "Only present when NODE_ENV=development"
           }
         }
       },
@@ -915,12 +915,12 @@
         "properties": {
           "nextCursor": {
             "type": ["string", "null"],
-            "description": "Cursor untuk halaman berikutnya; `null` jika sudah habis"
+            "description": "Cursor for the next page; `null` when there are no more pages"
           },
           "hasMore": { "type": "boolean" },
           "totalData": {
             "type": "integer",
-            "description": "Jumlah total data sesuai filter `search`. Hanya ada bila `withTotal=true` dan tanpa `cursor`"
+            "description": "Total number of records matching the `search` filter. Only present when `withTotal=true` and no `cursor` is given"
           }
         }
       },
@@ -992,7 +992,7 @@
           "slug": {
             "type": ["string", "null"],
             "maxLength": 500,
-            "description": "Diterima oleh validasi, tetapi server selalu menimpanya dengan slug dari `title`"
+            "description": "Accepted by validation, but the server always overwrites it with the slug generated from `title`"
           },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": ["string", "null"], "format": "date-time" }
@@ -1005,7 +1005,7 @@
           "slug": {
             "type": ["string", "null"],
             "maxLength": 500,
-            "description": "Ditimpa dengan slug dari `title` jika `title` ikut dikirim"
+            "description": "Overwritten with the slug generated from `title` when `title` is sent"
           },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": ["string", "null"], "format": "date-time" }
@@ -1021,12 +1021,12 @@
           "content": { "type": ["string", "null"] },
           "categoryId": {
             "type": ["integer", "null"],
-            "description": "ID kategori"
+            "description": "Category ID"
           },
           "slug": {
             "type": ["string", "null"],
             "maxLength": 500,
-            "description": "Diterima oleh validasi, tetapi server selalu menimpanya dengan slug dari `title`"
+            "description": "Accepted by validation, but the server always overwrites it with the slug generated from `title`"
           },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": ["string", "null"], "format": "date-time" }
@@ -1040,12 +1040,12 @@
           "content": { "type": ["string", "null"] },
           "categoryId": {
             "type": ["integer", "null"],
-            "description": "ID kategori"
+            "description": "Category ID"
           },
           "slug": {
             "type": ["string", "null"],
             "maxLength": 500,
-            "description": "Ditimpa dengan slug baru jika `title` ikut dikirim"
+            "description": "Overwritten with a new slug when `title` is sent"
           },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": ["string", "null"], "format": "date-time" }
