@@ -11,10 +11,12 @@ export const deleteServiceCategory = async ({
 }: {
   id: string;
 }): Promise<CategoryDeleteResponse> => {
-  const { id: i } = z.parse(CategoryValidation.DELETE, { id });
+  const { schemaId: validCategoryId } = z.parse(CategoryValidation.DELETE, {
+    schemaId: id,
+  });
   const [category] = await db
     .delete(categories)
-    .where(eq(categories.id, i))
+    .where(eq(categories.id, validCategoryId))
     .returning({ id: categories.id });
   if (!category) throw ApiError.notFound(CRUD_MESSAGE.notFound("category"));
   return category;

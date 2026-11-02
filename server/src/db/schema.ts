@@ -64,6 +64,7 @@ export const blogs = pgTable(
     slug: varchar("slug", { length: 500 }).unique(),
     title: varchar("title", { length: 300 }).notNull(),
     excerpt: text("excerpt"),
+    content: text("content"),
     ...defaultField,
   },
   (table) => [
@@ -131,6 +132,14 @@ export type UserMeResponse = Pick<User, "id" | "name" | "email" | "role">;
 export type CategoryCreateResponse = Pick<Category, "id">;
 export type CategoryUpdateResponse = Pick<Category, "id">;
 export type CategoryDeleteResponse = Pick<Category, "id">;
+
+export type BlogQueryResponse = Blog & {
+  category: Pick<Category, "id" | "title" | "slug"> | null;
+  user: Pick<User, "name" | "id" | "email"> | null;
+};
+export type BlogCreateResponse = Pick<Blog, "id">;
+export type BlogUpdateResponse = Pick<Blog, "id">;
+export type BlogDeleteResponse = Pick<Blog, "id">;
 
 export type QueryResponse<T> = {
   items: T[];

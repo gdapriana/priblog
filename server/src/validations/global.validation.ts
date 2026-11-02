@@ -20,5 +20,5 @@ export const getValidation = ({ by }: { by: string[] }) =>
   });
 
 export const deleteValidation = z.object({
-  id: z.coerce.number(),
+  schemaId: z.coerce.number(),
 });
