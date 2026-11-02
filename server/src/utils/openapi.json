@@ -12,9 +12,18 @@
     }
   ],
   "tags": [
-    { "name": "Auth", "description": "Registrasi, login, logout, dan profil user" },
-    { "name": "Categories", "description": "Kategori blog. Operasi tulis hanya untuk ADMIN" },
-    { "name": "Blogs", "description": "Blog. Operasi tulis butuh login dan hanya pemilik yang boleh mengubah/menghapus" }
+    {
+      "name": "Auth",
+      "description": "Registrasi, login, logout, dan profil user"
+    },
+    {
+      "name": "Categories",
+      "description": "Kategori blog. Operasi tulis hanya untuk ADMIN"
+    },
+    {
+      "name": "Blogs",
+      "description": "Blog. Operasi tulis butuh login dan hanya pemilik yang boleh mengubah/menghapus"
+    }
   ],
   "paths": {
     "/auth/register": {
@@ -27,7 +36,11 @@
           "content": {
             "application/json": {
               "schema": { "$ref": "#/components/schemas/RegisterBody" },
-              "example": { "name": "John Doe", "email": "john@example.com", "password": "11111111" }
+              "example": {
+                "name": "John Doe",
+                "email": "john@example.com",
+                "password": "11111111"
+              }
             }
           }
         },
@@ -39,7 +52,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/User" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
                   ]
                 }
               }
@@ -80,7 +98,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/User" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
                   ]
                 }
               }
@@ -89,7 +112,9 @@
           "400": {
             "description": "Body tidak valid, atau email/password salah",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } }
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+              }
             }
           },
           "500": { "$ref": "#/components/responses/InternalServerError" }
@@ -106,7 +131,9 @@
           "200": {
             "description": "Logout berhasil",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } }
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessEnvelope" }
+              }
             }
           },
           "500": { "$ref": "#/components/responses/InternalServerError" }
@@ -127,7 +154,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/UserMe" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/UserMe" }
+                      }
+                    }
                   ]
                 }
               }
@@ -193,7 +225,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Category" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Category" }
+                      }
+                    }
                   ]
                 }
               }
@@ -229,7 +266,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/IdOnly" }
+                      }
+                    }
                   ]
                 }
               }
@@ -275,7 +317,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/IdOnly" }
+                      }
+                    }
                   ]
                 }
               }
@@ -300,7 +347,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/IdOnly" }
+                      }
+                    }
                   ]
                 }
               }
@@ -342,7 +394,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/BlogList" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/BlogList" }
+                      }
+                    }
                   ]
                 }
               }
@@ -370,7 +427,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Blog" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/Blog" }
+                      }
+                    }
                   ]
                 }
               }
@@ -411,7 +473,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/IdOnly" }
+                      }
+                    }
                   ]
                 }
               }
@@ -457,7 +524,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/IdOnly" }
+                      }
+                    }
                   ]
                 }
               }
@@ -484,7 +556,12 @@
                 "schema": {
                   "allOf": [
                     { "$ref": "#/components/schemas/SuccessEnvelope" },
-                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/IdOnly" }
+                      }
+                    }
                   ]
                 }
               }
@@ -521,14 +598,23 @@
         "in": "query",
         "required": false,
         "description": "Sertakan `totalData` (hanya berlaku bila `cursor` kosong)",
-        "schema": { "type": "string", "enum": ["true", "false"], "default": "false" }
+        "schema": {
+          "type": "string",
+          "enum": ["true", "false"],
+          "default": "false"
+        }
       },
       "Take": {
         "name": "take",
         "in": "query",
         "required": false,
         "description": "Jumlah item per halaman",
-        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 }
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10
+        }
       },
       "Cursor": {
         "name": "cursor",
@@ -542,14 +628,22 @@
         "in": "query",
         "required": false,
         "description": "Kolom pengurutan",
-        "schema": { "type": "string", "enum": ["id", "title", "createdAt"], "default": "id" }
+        "schema": {
+          "type": "string",
+          "enum": ["id", "title", "createdAt"],
+          "default": "id"
+        }
       },
       "OrderBy": {
         "name": "orderBy",
         "in": "query",
         "required": false,
         "description": "Arah pengurutan",
-        "schema": { "type": "string", "enum": ["desc", "asc"], "default": "desc" }
+        "schema": {
+          "type": "string",
+          "enum": ["desc", "asc"],
+          "default": "desc"
+        }
       },
       "GetBy": {
         "name": "by",
@@ -619,7 +713,11 @@
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
-            "example": { "success": false, "message": "blog not found", "statusCode": 404 }
+            "example": {
+              "success": false,
+              "message": "blog not found",
+              "statusCode": 404
+            }
           }
         }
       },
@@ -628,7 +726,11 @@
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
-            "example": { "success": false, "message": "Email is already registered", "statusCode": 409 }
+            "example": {
+              "success": false,
+              "message": "Email is already registered",
+              "statusCode": 409
+            }
           }
         }
       },
@@ -637,7 +739,11 @@
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
-            "example": { "success": false, "message": "Internal server error", "statusCode": 500 }
+            "example": {
+              "success": false,
+              "message": "Internal server error",
+              "statusCode": 500
+            }
           }
         }
       }
@@ -648,7 +754,10 @@
         "required": ["success", "message", "statusCode"],
         "properties": {
           "success": { "type": "boolean", "const": true },
-          "message": { "type": "string", "examples": ["blog fetched successfully"] },
+          "message": {
+            "type": "string",
+            "examples": ["blog fetched successfully"]
+          },
           "statusCode": { "type": "integer", "examples": [200] },
           "data": {}
         }
@@ -680,7 +789,12 @@
               "type": "object",
               "properties": {
                 "path": { "type": "string", "examples": ["title"] },
-                "message": { "type": "string", "examples": ["Invalid input: expected string, received undefined"] },
+                "message": {
+                  "type": "string",
+                  "examples": [
+                    "Invalid input: expected string, received undefined"
+                  ]
+                },
                 "code": { "type": "string", "examples": ["invalid_type"] }
               }
             }
@@ -749,7 +863,17 @@
       },
       "Blog": {
         "type": "object",
-        "required": ["id", "userId", "categoryId", "slug", "title", "excerpt", "content", "createdAt", "updatedAt"],
+        "required": [
+          "id",
+          "userId",
+          "categoryId",
+          "slug",
+          "title",
+          "excerpt",
+          "content",
+          "createdAt",
+          "updatedAt"
+        ],
         "properties": {
           "id": { "type": "integer" },
           "userId": { "type": ["integer", "null"] },
@@ -770,10 +894,16 @@
             "required": ["category", "user"],
             "properties": {
               "category": {
-                "oneOf": [{ "$ref": "#/components/schemas/CategorySummary" }, { "type": "null" }]
+                "oneOf": [
+                  { "$ref": "#/components/schemas/CategorySummary" },
+                  { "type": "null" }
+                ]
               },
               "user": {
-                "oneOf": [{ "$ref": "#/components/schemas/UserSummary" }, { "type": "null" }]
+                "oneOf": [
+                  { "$ref": "#/components/schemas/UserSummary" },
+                  { "type": "null" }
+                ]
               }
             }
           }
@@ -801,7 +931,10 @@
             "type": "object",
             "required": ["items"],
             "properties": {
-              "items": { "type": "array", "items": { "$ref": "#/components/schemas/Category" } }
+              "items": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Category" }
+              }
             }
           }
         ]
@@ -813,7 +946,10 @@
             "type": "object",
             "required": ["items"],
             "properties": {
-              "items": { "type": "array", "items": { "$ref": "#/components/schemas/BlogWithRelations" } }
+              "items": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/BlogWithRelations" }
+              }
             }
           }
         ]
@@ -825,7 +961,12 @@
         "properties": {
           "name": { "type": "string", "minLength": 1, "maxLength": 200 },
           "email": { "type": "string", "format": "email", "maxLength": 200 },
-          "password": { "type": "string", "minLength": 8, "maxLength": 1000, "format": "password" }
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 1000,
+            "format": "password"
+          }
         }
       },
       "LoginBody": {
@@ -834,7 +975,12 @@
         "required": ["email", "password"],
         "properties": {
           "email": { "type": "string", "format": "email", "maxLength": 200 },
-          "password": { "type": "string", "minLength": 1, "maxLength": 1000, "format": "password" }
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "format": "password"
+          }
         }
       },
       "CategoryCreateBody": {
@@ -873,7 +1019,10 @@
           "title": { "type": "string", "maxLength": 300 },
           "excerpt": { "type": ["string", "null"] },
           "content": { "type": ["string", "null"] },
-          "categoryId": { "type": ["integer", "null"], "description": "ID kategori" },
+          "categoryId": {
+            "type": ["integer", "null"],
+            "description": "ID kategori"
+          },
           "slug": {
             "type": ["string", "null"],
             "maxLength": 500,
@@ -889,7 +1038,10 @@
           "title": { "type": "string", "maxLength": 300 },
           "excerpt": { "type": ["string", "null"] },
           "content": { "type": ["string", "null"] },
-          "categoryId": { "type": ["integer", "null"], "description": "ID kategori" },
+          "categoryId": {
+            "type": ["integer", "null"],
+            "description": "ID kategori"
+          },
           "slug": {
             "type": ["string", "null"],
             "maxLength": 500,

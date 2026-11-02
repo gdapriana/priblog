@@ -31,7 +31,8 @@ app.use(
     spec: {
       content: openApiDocument,
     },
-    theme: "purple",
+    theme: "halloween",
+    layout: "classic",
     pageTitle: "FinanCare API Reference",
   }),
 );
