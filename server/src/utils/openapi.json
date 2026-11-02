@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Priblog",
-    "description": "Priblog",
+    "description": "REST API Priblog: autentikasi berbasis sesi (cookie), blog, dan kategori.\n\nSemua respons memakai format envelope `{ success, message, statusCode, data?, errors? }`. Autentikasi memakai cookie `session` (httpOnly) yang diset saat login.",
     "version": "1.0.0"
   },
   "servers": [
@@ -11,9 +11,894 @@
       "description": "API Base URL"
     }
   ],
-  "security": [
-    {
-      "BearerAuth": []
+  "tags": [
+    { "name": "Auth", "description": "Registrasi, login, logout, dan profil user" },
+    { "name": "Categories", "description": "Kategori blog. Operasi tulis hanya untuk ADMIN" },
+    { "name": "Blogs", "description": "Blog. Operasi tulis butuh login dan hanya pemilik yang boleh mengubah/menghapus" }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Registrasi user baru",
+        "operationId": "authRegister",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterBody" },
+              "example": { "name": "John Doe", "email": "john@example.com", "password": "11111111" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registrasi berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/User" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login",
+        "description": "Jika berhasil, server mengirim cookie `session` (httpOnly, sameSite=lax, berlaku 30 hari dan diperpanjang otomatis).",
+        "operationId": "authLogin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginBody" },
+              "example": { "email": "john@example.com", "password": "11111111" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Cookie sesi `session=<token>; HttpOnly; Path=/; SameSite=Lax`",
+                "schema": { "type": "string" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/User" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body tidak valid, atau email/password salah",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "delete": {
+        "tags": ["Auth"],
+        "summary": "Logout",
+        "description": "Menghapus sesi di server dan membersihkan cookie `session`. Aman dipanggil walau belum login.",
+        "operationId": "authLogout",
+        "responses": {
+          "200": {
+            "description": "Logout berhasil",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Profil user yang sedang login",
+        "operationId": "authMe",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Data user saat ini",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/UserMe" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/categories/query": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Daftar kategori (cursor pagination)",
+        "description": "Pencarian pada `title` dan `slug` (tidak case sensitive). Urutan selalu memakai `id` sebagai tie-breaker. `nextCursor` dipakai apa adanya sebagai parameter `cursor` berikutnya. `totalData` hanya dikirim jika `withTotal=true` dan `cursor` tidak diisi.",
+        "operationId": "categoryQuery",
+        "parameters": [
+          { "$ref": "#/components/parameters/Search" },
+          { "$ref": "#/components/parameters/WithTotal" },
+          { "$ref": "#/components/parameters/Take" },
+          { "$ref": "#/components/parameters/Cursor" },
+          { "$ref": "#/components/parameters/SortBy" },
+          { "$ref": "#/components/parameters/OrderBy" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar kategori",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/CategoryList" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/categories/get": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Ambil satu kategori berdasarkan id atau slug",
+        "operationId": "categoryGet",
+        "parameters": [
+          { "$ref": "#/components/parameters/GetBy" },
+          { "$ref": "#/components/parameters/GetValue" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Kategori ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Category" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/categories": {
+      "post": {
+        "tags": ["Categories"],
+        "summary": "Buat kategori (ADMIN)",
+        "description": "Slug dibuat otomatis dari `title`. Body bersifat strict: properti di luar schema ditolak.",
+        "operationId": "categoryCreate",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryCreateBody" },
+              "example": { "title": "Teknologi" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kategori dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/UnauthorizedOrNotAdmin" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/categories/{categoryId}": {
+      "parameters": [
+        {
+          "name": "categoryId",
+          "in": "path",
+          "required": true,
+          "description": "ID kategori",
+          "schema": { "type": "integer" }
+        }
+      ],
+      "patch": {
+        "tags": ["Categories"],
+        "summary": "Ubah kategori (ADMIN)",
+        "description": "Semua field opsional. Jika `title` dikirim, slug dibuat ulang dari title baru.",
+        "operationId": "categoryUpdate",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryUpdateBody" },
+              "example": { "title": "Teknologi dan Sains" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kategori diubah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/UnauthorizedOrNotAdmin" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      },
+      "delete": {
+        "tags": ["Categories"],
+        "summary": "Hapus kategori (ADMIN)",
+        "operationId": "categoryDelete",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Kategori dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/UnauthorizedOrNotAdmin" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/blogs/query": {
+      "get": {
+        "tags": ["Blogs"],
+        "summary": "Daftar blog (cursor pagination)",
+        "description": "Pencarian pada `title` dan `slug`. Setiap item menyertakan `category` dan `user` (bisa `null`). `userId` memfilter blog milik satu user. `totalData` hanya dikirim jika `withTotal=true` dan `cursor` tidak diisi.",
+        "operationId": "blogQuery",
+        "parameters": [
+          { "$ref": "#/components/parameters/Search" },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "description": "Hanya tampilkan blog milik user ini",
+            "schema": { "type": "integer" }
+          },
+          { "$ref": "#/components/parameters/WithTotal" },
+          { "$ref": "#/components/parameters/Take" },
+          { "$ref": "#/components/parameters/Cursor" },
+          { "$ref": "#/components/parameters/SortBy" },
+          { "$ref": "#/components/parameters/OrderBy" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar blog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/BlogList" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/blogs/get": {
+      "get": {
+        "tags": ["Blogs"],
+        "summary": "Ambil satu blog berdasarkan id atau slug",
+        "operationId": "blogGet",
+        "parameters": [
+          { "$ref": "#/components/parameters/GetBy" },
+          { "$ref": "#/components/parameters/GetValue" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog ditemukan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Blog" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/blogs": {
+      "post": {
+        "tags": ["Blogs"],
+        "summary": "Buat blog",
+        "description": "Pemilik blog (`userId`) diambil dari sesi login, dan slug dibuat otomatis dari `title`. Body bersifat strict: properti di luar schema ditolak.",
+        "operationId": "blogCreate",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BlogCreateBody" },
+              "example": {
+                "title": "Belajar Drizzle ORM",
+                "excerpt": "Ringkasan singkat",
+                "content": "Isi lengkap blog...",
+                "categoryId": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blog dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
+    },
+    "/blogs/{blogId}": {
+      "parameters": [
+        {
+          "name": "blogId",
+          "in": "path",
+          "required": true,
+          "description": "ID blog",
+          "schema": { "type": "integer" }
+        }
+      ],
+      "patch": {
+        "tags": ["Blogs"],
+        "summary": "Ubah blog (hanya pemilik)",
+        "description": "Semua field opsional. Jika `title` dikirim, slug dibuat ulang. Mengembalikan 403 jika blog bukan milik user yang login.",
+        "operationId": "blogUpdate",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BlogUpdateBody" },
+              "example": { "title": "Judul baru", "excerpt": "Ringkasan baru" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blog diubah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      },
+      "delete": {
+        "tags": ["Blogs"],
+        "summary": "Hapus blog (hanya pemilik)",
+        "description": "Mengembalikan 403 jika blog bukan milik user yang login.",
+        "operationId": "blogDelete",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Blog dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/IdOnly" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalServerError" }
+        }
+      }
     }
-  ]
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session",
+        "description": "Cookie sesi yang diset oleh `POST /auth/login`"
+      }
+    },
+    "parameters": {
+      "Search": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Kata kunci pencarian pada title dan slug",
+        "schema": { "type": "string", "minLength": 1, "maxLength": 200 }
+      },
+      "WithTotal": {
+        "name": "withTotal",
+        "in": "query",
+        "required": false,
+        "description": "Sertakan `totalData` (hanya berlaku bila `cursor` kosong)",
+        "schema": { "type": "string", "enum": ["true", "false"], "default": "false" }
+      },
+      "Take": {
+        "name": "take",
+        "in": "query",
+        "required": false,
+        "description": "Jumlah item per halaman",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 }
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "description": "Nilai `nextCursor` dari respons sebelumnya. Cursor yang rusak menghasilkan 400",
+        "schema": { "type": "string", "maxLength": 500 }
+      },
+      "SortBy": {
+        "name": "sortBy",
+        "in": "query",
+        "required": false,
+        "description": "Kolom pengurutan",
+        "schema": { "type": "string", "enum": ["id", "title", "createdAt"], "default": "id" }
+      },
+      "OrderBy": {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Arah pengurutan",
+        "schema": { "type": "string", "enum": ["desc", "asc"], "default": "desc" }
+      },
+      "GetBy": {
+        "name": "by",
+        "in": "query",
+        "required": true,
+        "description": "Kolom pencarian",
+        "schema": { "type": "string", "enum": ["id", "slug"] }
+      },
+      "GetValue": {
+        "name": "value",
+        "in": "query",
+        "required": true,
+        "description": "Nilai id (angka) atau slug sesuai `by`",
+        "schema": { "type": "string" }
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "Validasi gagal (body/query/param tidak sesuai schema)",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ValidationErrorEnvelope" }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Belum login atau sesi tidak valid",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "success": false,
+              "message": "You must be logged in to access this resource",
+              "statusCode": 401
+            }
+          }
+        }
+      },
+      "UnauthorizedOrNotAdmin": {
+        "description": "Belum login, atau user bukan ADMIN (saat ini server juga memakai 401 untuk role yang tidak sesuai)",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "success": false,
+              "message": "You must be logged in to access this resource",
+              "statusCode": 401
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Tidak punya izin (bukan pemilik resource)",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "success": false,
+              "message": "You don't have permission to access this resource",
+              "statusCode": 403
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource tidak ditemukan",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": { "success": false, "message": "blog not found", "statusCode": 404 }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Data sudah ada (email atau slug duplikat)",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": { "success": false, "message": "Email is already registered", "statusCode": 409 }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Kesalahan server",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": { "success": false, "message": "Internal server error", "statusCode": 500 }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "SuccessEnvelope": {
+        "type": "object",
+        "required": ["success", "message", "statusCode"],
+        "properties": {
+          "success": { "type": "boolean", "const": true },
+          "message": { "type": "string", "examples": ["blog fetched successfully"] },
+          "statusCode": { "type": "integer", "examples": [200] },
+          "data": {}
+        }
+      },
+      "ErrorEnvelope": {
+        "type": "object",
+        "required": ["success", "message", "statusCode"],
+        "properties": {
+          "success": { "type": "boolean", "const": false },
+          "message": { "type": "string" },
+          "statusCode": { "type": "integer" },
+          "errors": {},
+          "stack": {
+            "type": "string",
+            "description": "Hanya ada bila NODE_ENV=development"
+          }
+        }
+      },
+      "ValidationErrorEnvelope": {
+        "type": "object",
+        "required": ["success", "message", "statusCode", "errors"],
+        "properties": {
+          "success": { "type": "boolean", "const": false },
+          "message": { "type": "string", "examples": ["Validation error"] },
+          "statusCode": { "type": "integer", "examples": [400] },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string", "examples": ["title"] },
+                "message": { "type": "string", "examples": ["Invalid input: expected string, received undefined"] },
+                "code": { "type": "string", "examples": ["invalid_type"] }
+              }
+            }
+          }
+        }
+      },
+      "IdOnly": {
+        "type": "object",
+        "required": ["id"],
+        "properties": { "id": { "type": "integer", "examples": [1] } }
+      },
+      "Role": {
+        "type": "string",
+        "enum": ["ADMIN", "USER"]
+      },
+      "User": {
+        "type": "object",
+        "required": ["id", "name", "email", "role", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string", "maxLength": 255 },
+          "email": { "type": "string", "format": "email", "maxLength": 255 },
+          "role": { "$ref": "#/components/schemas/Role" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "UserMe": {
+        "type": "object",
+        "required": ["id", "name", "email", "role"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role": { "$ref": "#/components/schemas/Role" }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "required": ["id", "title", "slug", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "type": "integer" },
+          "slug": { "type": ["string", "null"], "maxLength": 500 },
+          "title": { "type": "string", "maxLength": 300 },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "CategorySummary": {
+        "type": "object",
+        "required": ["id", "title", "slug"],
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "slug": { "type": ["string", "null"] }
+        }
+      },
+      "UserSummary": {
+        "type": "object",
+        "required": ["id", "name", "email"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" }
+        }
+      },
+      "Blog": {
+        "type": "object",
+        "required": ["id", "userId", "categoryId", "slug", "title", "excerpt", "content", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "type": "integer" },
+          "userId": { "type": ["integer", "null"] },
+          "categoryId": { "type": ["integer", "null"] },
+          "slug": { "type": ["string", "null"], "maxLength": 500 },
+          "title": { "type": "string", "maxLength": 300 },
+          "excerpt": { "type": ["string", "null"] },
+          "content": { "type": ["string", "null"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "BlogWithRelations": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Blog" },
+          {
+            "type": "object",
+            "required": ["category", "user"],
+            "properties": {
+              "category": {
+                "oneOf": [{ "$ref": "#/components/schemas/CategorySummary" }, { "type": "null" }]
+              },
+              "user": {
+                "oneOf": [{ "$ref": "#/components/schemas/UserSummary" }, { "type": "null" }]
+              }
+            }
+          }
+        ]
+      },
+      "PageMeta": {
+        "type": "object",
+        "required": ["nextCursor", "hasMore"],
+        "properties": {
+          "nextCursor": {
+            "type": ["string", "null"],
+            "description": "Cursor untuk halaman berikutnya; `null` jika sudah habis"
+          },
+          "hasMore": { "type": "boolean" },
+          "totalData": {
+            "type": "integer",
+            "description": "Jumlah total data sesuai filter `search`. Hanya ada bila `withTotal=true` dan tanpa `cursor`"
+          }
+        }
+      },
+      "CategoryList": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PageMeta" },
+          {
+            "type": "object",
+            "required": ["items"],
+            "properties": {
+              "items": { "type": "array", "items": { "$ref": "#/components/schemas/Category" } }
+            }
+          }
+        ]
+      },
+      "BlogList": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PageMeta" },
+          {
+            "type": "object",
+            "required": ["items"],
+            "properties": {
+              "items": { "type": "array", "items": { "$ref": "#/components/schemas/BlogWithRelations" } }
+            }
+          }
+        ]
+      },
+      "RegisterBody": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "email", "password"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "email": { "type": "string", "format": "email", "maxLength": 200 },
+          "password": { "type": "string", "minLength": 8, "maxLength": 1000, "format": "password" }
+        }
+      },
+      "LoginBody": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "maxLength": 200 },
+          "password": { "type": "string", "minLength": 1, "maxLength": 1000, "format": "password" }
+        }
+      },
+      "CategoryCreateBody": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "maxLength": 300 },
+          "slug": {
+            "type": ["string", "null"],
+            "maxLength": 500,
+            "description": "Diterima oleh validasi, tetapi server selalu menimpanya dengan slug dari `title`"
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "CategoryUpdateBody": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "maxLength": 300 },
+          "slug": {
+            "type": ["string", "null"],
+            "maxLength": 500,
+            "description": "Ditimpa dengan slug dari `title` jika `title` ikut dikirim"
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "BlogCreateBody": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "maxLength": 300 },
+          "excerpt": { "type": ["string", "null"] },
+          "content": { "type": ["string", "null"] },
+          "categoryId": { "type": ["integer", "null"], "description": "ID kategori" },
+          "slug": {
+            "type": ["string", "null"],
+            "maxLength": 500,
+            "description": "Diterima oleh validasi, tetapi server selalu menimpanya dengan slug dari `title`"
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "BlogUpdateBody": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "maxLength": 300 },
+          "excerpt": { "type": ["string", "null"] },
+          "content": { "type": ["string", "null"] },
+          "categoryId": { "type": ["integer", "null"], "description": "ID kategori" },
+          "slug": {
+            "type": ["string", "null"],
+            "maxLength": 500,
+            "description": "Ditimpa dengan slug baru jika `title` ikut dikirim"
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      }
+    }
+  }
 }
