@@ -1,4 +1,5 @@
 export const buildQuery = <T>(filter?: T) => {
+  if (!filter) return "";
   const params = new URLSearchParams();
 
   Object.entries(filter).forEach(([key, value]) => {

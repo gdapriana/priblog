@@ -23,7 +23,7 @@ export const useBlogsQuery = ({
   filter,
 }: {
   filter?: FilterBlog;
-}): UseQueryResult<ApiResponse<BlogsQueryResponse>, Error> => {
+} = {}): UseQueryResult<ApiResponse<BlogsQueryResponse>, Error> => {
   return useQuery({
     queryKey: QUERY_KEYS.blogs.all,
     queryFn: async () => {
