@@ -1,2 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&display=swap");
 @import "tailwindcss";
 @import "@heroui/styles";
+
+@theme {
+  --font-sans: "Host Grotesk", sans-serif;
+}
+
+@utility container {
+  @apply w-full max-w-7xl mx-auto p-4;
+}
+
+@layer components {
+  .input,
+  .input-group {
+    @apply shadow-none border border-foreground/5 rounded-full;
+  }
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
