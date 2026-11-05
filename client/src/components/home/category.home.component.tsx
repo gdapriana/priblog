@@ -78,7 +78,7 @@ export const CategoryHome = () => {
                             : "text-foreground/70",
                         )}
                       >
-                        {item._count.blog} Blogs
+                        {item?._count?.blog} Blogs
                       </span>
                     </div>
                   </div>
