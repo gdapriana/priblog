@@ -154,7 +154,7 @@ const Blogspage = () => {
                 setCursors((prev) => [...prev, query.cursor ?? ""]);
                 setQuery((prev) => ({
                   ...prev,
-                  cursor: blogs.data.nextCursor ?? undefined,
+                  cursor: blogs?.data?.nextCursor ?? undefined,
                 }));
               }}
             >
