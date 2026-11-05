@@ -1,7 +1,10 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { QUERY_KEYS } from "../constants/query.keys.constant";
 import { buildQuery } from "../utils/query.utils";
-import type { ApiResponse, Blog } from "../data/type.data";
+import type { ApiResponse, Blog, QueryResponse } from "../data/type.data";
+import type { orderBy } from "../utils/hook.utils";
+
+export const blogSortBy = ["createdAt", "id", "title"] as const;
 
 export interface FilterBlog {
   search?: string;
@@ -9,21 +12,15 @@ export interface FilterBlog {
   take?: number;
   cursor?: string;
   withTotal?: "true" | "false";
-  sortBy?: "id" | "title" | "createdAt";
-  orderBy?: "desc" | "asc";
-}
-
-export interface BlogsQueryResponse {
-  items: Blog[];
-  nextCursor: string | null;
-  hasMore: boolean;
+  sortBy?: (typeof blogSortBy)[number];
+  orderBy?: (typeof orderBy)[number];
 }
 
 export const useBlogsQuery = ({
   filter,
 }: {
   filter?: FilterBlog;
-} = {}): UseQueryResult<ApiResponse<BlogsQueryResponse>, Error> => {
+} = {}): UseQueryResult<ApiResponse<QueryResponse<Blog>>, Error> => {
   return useQuery({
     queryKey: QUERY_KEYS.blogs.all,
     queryFn: async () => {

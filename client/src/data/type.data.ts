@@ -5,6 +5,7 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
   cover?: string;
+  _count?: { blog?: number };
 }
 
 export interface BlogUser {
@@ -33,4 +34,10 @@ export interface ApiResponse<T> {
   message: string;
   data: T;
   statusCode: number;
+}
+
+export interface QueryResponse<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
 }

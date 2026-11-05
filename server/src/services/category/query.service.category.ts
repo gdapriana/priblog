@@ -1,7 +1,20 @@
 import z from "zod";
-import { and, asc, count, desc, eq, gt, ilike, lt, or } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  ilike,
+  lt,
+  or,
+  sql,
+} from "drizzle-orm";
 import db from "../../configs/db.js";
 import {
+  blogs,
   categories,
   type Category,
   type QueryResponse,
@@ -83,9 +96,15 @@ export const queryServiceCategory = async (
           );
   }
 
+  const blogCount = sql<number>`(
+    select count(*)::int
+    from ${blogs}
+    where ${blogs.categoryId} = ${categories.id}
+  )`.as("blog_count");
+
   const [rows, totalRows] = await Promise.all([
     db
-      .select()
+      .select({ ...getTableColumns(categories), _count: { blog: blogCount } })
       .from(categories)
       .where(and(searchCondition, cursorCondition))
       .orderBy(direction(sortColumn), direction(categories.id))

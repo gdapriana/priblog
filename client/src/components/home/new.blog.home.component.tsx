@@ -13,9 +13,19 @@ import moment from "moment";
 import { useBlogsQuery } from "../../hooks/use.blog.hook";
 
 export const NewBlogHome = () => {
-  const { data, isLoading } = useBlogsQuery();
+  const { data, isLoading } = useBlogsQuery({
+    filter: {
+      take: 6,
+      sortBy: "createdAt",
+    },
+  });
   return (
-    <div className="grid w-full p-6 md:p-8 grid-cols-1 md:grid-cols-[2fr_1fr] gap-x-4 gap-y-12 md:gap-y-0 md:grid-rows-5 grid-rows-5 overflow-auto">
+    <div
+      className={cn(
+        "grid w-full p-6 md:p-8 grid-cols-1 md:grid-cols-[2fr_1fr] gap-x-4 gap-y-12 md:gap-y-0 md:grid-rows-5 grid-rows-5 overflow-auto",
+        isLoading && "md:gap-y-4",
+      )}
+    >
       {data &&
         data.data &&
         data.data.items &&
