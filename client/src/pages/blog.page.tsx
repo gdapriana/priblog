@@ -27,7 +27,10 @@ import type { Blog } from "../data/type.data";
 
 const BlogPage = () => {
   const { slug } = useParams();
-  const { data: blog, isLoading } = useGetBlog({ by: "slug", value: slug });
+  const { data: blog, isLoading } = useGetBlog({
+    by: "slug",
+    value: slug ?? "",
+  });
 
   const { data: relatedBlogs, isLoading: loadingRelatedBlogs } = useQueryBlog({
     filter: {
@@ -55,8 +58,8 @@ const BlogPage = () => {
             <div className="flex flex-col justify-start items-stretch">
               <div className="p-6 md:p-8 flex flex-col justify-start items-stretch gap-4">
                 <div className="flex w-full aspect-video bg-foreground/5  justify-center items-center rounded-3xl">
-                  {blog.data.cover ? (
-                    <img src={blog.data.cover} alt="cover" />
+                  {blog.data?.cover ? (
+                    <img src={blog.data?.cover ?? ""} alt="cover" />
                   ) : (
                     <HugeiconsIcon
                       icon={ImageOff}
