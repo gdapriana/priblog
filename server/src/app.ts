@@ -14,7 +14,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [
-      "https://priblogclient.vercel.app/",
+      "https://priblogclient.vercel.app",
       "http://localhost:3000",
       "http://localhost:5173",
     ],
