@@ -14,9 +14,9 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [
+      "https://priblogclient.vercel.app/",
       "http://localhost:3000",
       "http://localhost:5173",
-      "https://priblogclient.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
