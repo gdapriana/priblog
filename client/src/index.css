@@ -6,6 +6,14 @@
   --font-sans: "Host Grotesk", sans-serif;
 }
 
+body {
+  font-family: var(--font-sans);
+}
+
+.prose {
+  font-family: var(--font-sans);
+}
+
 @utility container {
   @apply w-full max-w-7xl mx-auto p-4;
 }

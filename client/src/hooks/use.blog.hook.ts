@@ -4,11 +4,12 @@ import { buildQuery } from "../utils/query.utils";
 import type { ApiResponse, Blog, QueryResponse } from "../data/type.data";
 import type { orderBy } from "../utils/hook.utils";
 
-export const blogSortBy = ["createdAt", "id", "title"] as const;
+export const blogSortBy = ["createdAt", "title"] as const;
 
 export interface FilterBlog {
   search?: string;
   userId?: number;
+  categoryId?: number;
   take?: number;
   cursor?: string;
   withTotal?: "true" | "false";
@@ -16,16 +17,40 @@ export interface FilterBlog {
   orderBy?: (typeof orderBy)[number];
 }
 
-export const useBlogsQuery = ({
+export const useQueryBlog = ({
   filter,
+  enabled,
 }: {
   filter?: FilterBlog;
+  enabled?: boolean;
 } = {}): UseQueryResult<ApiResponse<QueryResponse<Blog>>, Error> => {
   return useQuery({
-    queryKey: QUERY_KEYS.blogs.all,
+    queryKey: [QUERY_KEYS.blogs.all, filter],
     queryFn: async () => {
       const res = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/api/blogs/query?${buildQuery(filter)}`,
+        {
+          method: "GET",
+        },
+      );
+      return res.json();
+    },
+    enabled,
+  });
+};
+
+export const useGetBlog = ({
+  by,
+  value,
+}: {
+  by: "id" | "slug";
+  value: string;
+}): UseQueryResult<ApiResponse<Blog>, Error> => {
+  return useQuery({
+    queryKey: [by, value],
+    queryFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/api/blogs/get?${buildQuery({ by, value })}`,
         {
           method: "GET",
         },

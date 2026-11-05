@@ -73,10 +73,16 @@ const decodeCursor = (cursor: string, sortBy: SortBy) => {
 export const queryServiceBlog = async (
   query: unknown,
 ): Promise<QueryResponse<BlogQueryResponse>> => {
-  const { search, userId, withTotal, take, cursor, sortBy, orderBy } = z.parse(
-    BlogValidation.QUERY,
-    query,
-  );
+  const {
+    search,
+    userId,
+    withTotal,
+    take,
+    cursor,
+    sortBy,
+    orderBy,
+    categoryId,
+  } = z.parse(BlogValidation.QUERY, query);
 
   const sortColumn = sortColumns[sortBy];
   const direction = orderBy === "asc" ? asc : desc;
@@ -120,6 +126,7 @@ export const queryServiceBlog = async (
           searchCondition,
           cursorCondition,
           userId ? eq(blogs.userId, userId) : undefined,
+          categoryId ? eq(categories.id, categoryId) : undefined,
         ),
       )
       .orderBy(direction(sortColumn), direction(blogs.id))

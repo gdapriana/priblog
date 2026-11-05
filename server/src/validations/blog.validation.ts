@@ -11,6 +11,7 @@ export class BlogValidation {
   static QUERY = z.object({
     search: z.string().trim().min(1).max(200).optional(),
     userId: z.coerce.number().optional(),
+    categoryId: z.coerce.number().optional(),
     withTotal: z
       .enum(["true", "false"])
       .default("false")

@@ -1,0 +1,268 @@
+import { Link, useParams } from "react-router";
+import { useGetBlog, useQueryBlog } from "../hooks/use.blog.hook";
+import { buttonVariants, cn } from "@heroui/styles";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  FileStackFreeIcons,
+  ImageOff,
+  Time,
+  User,
+} from "@hugeicons/core-free-icons";
+import { Button, Description, Skeleton, Typography } from "@heroui/react";
+import moment from "moment";
+import {
+  codeBlockPlugin,
+  codeMirrorPlugin,
+  headingsPlugin,
+  imagePlugin,
+  linkPlugin,
+  listsPlugin,
+  MDXEditor,
+  quotePlugin,
+  tablePlugin,
+  thematicBreakPlugin,
+} from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
+import type { Blog } from "../data/type.data";
+
+const BlogPage = () => {
+  const { slug } = useParams();
+  const { data: blog, isLoading } = useGetBlog({ by: "slug", value: slug });
+
+  const { data: relatedBlogs, isLoading: loadingRelatedBlogs } = useQueryBlog({
+    filter: {
+      take: 5,
+      categoryId:
+        blog && blog.data && blog.data.category && blog.data.category.id,
+    },
+    enabled: blog && blog.success,
+  });
+
+  return (
+    <main className="flex h-full relative flex-col justify-start items-stretch">
+      {!isLoading && blog && !blog.success && (
+        <div className="w-full h-full z-2 absolute top-0 left-0 flex-col flex justify-center gap-2 items-center">
+          <p>No resource found</p>
+          <Link className={buttonVariants({ variant: "primary" })} to={"/"}>
+            Back home
+          </Link>
+        </div>
+      )}
+
+      <div className="w-full grid grid-cols-1 grid-rows-1 md:grid-cols-[2fr_1fr] h-full">
+        {!isLoading && blog && blog.success && blog.data && (
+          <div className="h-full w-full overflow-auto">
+            <div className="flex flex-col justify-start items-stretch">
+              <div className="p-6 md:p-8 flex flex-col justify-start items-stretch gap-4">
+                <div className="flex w-full aspect-video bg-foreground/5  justify-center items-center rounded-3xl">
+                  {blog.data.cover ? (
+                    <img src={blog.data.cover} alt="cover" />
+                  ) : (
+                    <HugeiconsIcon
+                      icon={ImageOff}
+                      size={24}
+                      className="text-foreground/10"
+                    />
+                  )}
+                </div>
+                <h1 className="font-bold text-xl">{blog.data.title}</h1>
+                <Description className="text-sm">
+                  {blog.data.excerpt}
+                </Description>
+              </div>
+              <div className="flex flex-col justify-start items-stretch gap-4">
+                <div className="p-6 md:p-8 flex gap-2 justify-center items-center border-y border-foreground/5">
+                  <Button size="sm">
+                    <HugeiconsIcon icon={User} />
+                    {blog.data.user?.name}
+                  </Button>
+                  <Link
+                    className={buttonVariants({
+                      size: "sm",
+                      variant: "outline",
+                    })}
+                    to={`/categories/${blog.data.category?.slug}`}
+                  >
+                    <HugeiconsIcon icon={FileStackFreeIcons} />
+                    {blog.data.category?.title.length > 5
+                      ? `${blog.data.category?.title.substring(0, 5)}...`
+                      : blog.data.category?.title}
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="ml-auto text-muted text-sm font-thin"
+                    size="sm"
+                  >
+                    <HugeiconsIcon icon={Time} />
+                    {moment(blog.data.createdAt).fromNow()}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-6 md:p-8 font-sans">
+                {blog.data.content ? (
+                  <Typography.Prose>
+                    <MDXEditor
+                      markdown={blog.data.content}
+                      readOnly
+                      contentEditableClassName="prose dark:prose-invert"
+                      plugins={[
+                        headingsPlugin(),
+                        listsPlugin(),
+                        quotePlugin(),
+                        linkPlugin(),
+                        tablePlugin(),
+                        thematicBreakPlugin(),
+                        imagePlugin(),
+                        codeBlockPlugin({ defaultCodeBlockLanguage: "ts" }),
+                        codeMirrorPlugin({
+                          codeBlockLanguages: {
+                            ts: "TypeScript",
+                            js: "JavaScript",
+                            css: "CSS",
+                          },
+                        }),
+                      ]}
+                    />
+                  </Typography.Prose>
+                ) : (
+                  <div className="flex text-muted w-full py-10 justify-center items-center">
+                    No content
+                  </div>
+                )}
+              </div>
+
+              <div className="md:hidden flex p-6 md:p-8 flex-col justify-start items-stretch gap-2">
+                <h2 className="font-bold text-lg">Related Blog</h2>
+                <div className="flex justify-start flex-col items-stretch gap-2">
+                  {!loadingRelatedBlogs &&
+                    relatedBlogs &&
+                    relatedBlogs.data &&
+                    relatedBlogs.data.items &&
+                    relatedBlogs.data.items.map((item: Blog, idx: number) => (
+                      <Link
+                        to={`/blogs/${item.slug}`}
+                        key={idx}
+                        className="flex"
+                      >
+                        <article
+                          className={cn(
+                            "flex flex-row justify-center gap-4 items-stretch py-4 border-foreground/10",
+                          )}
+                        >
+                          <div className="h-full max-h-20 overflow-hidden aspect-video video bg-foreground/10 rounded-xl flex justify-center items-center">
+                            {item.cover ? (
+                              <img
+                                src={item.cover}
+                                alt="cover"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <HugeiconsIcon
+                                icon={ImageOff}
+                                size={16}
+                                className="text-foreground/20"
+                              />
+                            )}
+                          </div>
+                          <div className="flex flex-col w-8/12 justify-center items-start">
+                            <h3 className="font-semibold line-clamp-1">
+                              {item.title}
+                            </h3>
+                            <Description className="line-clamp-2">
+                              {item.excerpt}
+                            </Description>
+                          </div>
+                        </article>
+                      </Link>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="flex flex-col justify-start items-stretch">
+            <div className="p-6 md:p-8 flex flex-col justify-start items-stretch gap-4">
+              <Skeleton className="aspect-video rounded-3xl"></Skeleton>
+              <Skeleton className="aspect-16/2 rounded-3xl"></Skeleton>
+              <Skeleton className="aspect-16/2 rounded-3xl"></Skeleton>
+              <Skeleton className="aspect-square full rounded-3xl"></Skeleton>
+            </div>
+          </div>
+        )}
+
+        <div className="hidden md:flex flex-col border-foreground/5 border-l justify-start items-stretch">
+          <div className="flex p-6 md:p-8 flex-col justify-start items-stretch gap-2">
+            <h2 className="font-bold text-lg">Related Blog</h2>
+            <div className="flex justify-start flex-col items-stretch gap-2">
+              {!loadingRelatedBlogs &&
+                relatedBlogs &&
+                relatedBlogs.data &&
+                relatedBlogs.data.items &&
+                relatedBlogs.data.items.map((item: Blog, idx: number) => (
+                  <Link to={`/blogs/${item.slug}`} key={idx} className="flex">
+                    <article
+                      className={cn(
+                        "flex flex-row justify-center gap-4 items-stretch py-4 border-foreground/10",
+                      )}
+                    >
+                      <div className="h-full max-h-20 overflow-hidden aspect-video video bg-foreground/10 rounded-xl flex justify-center items-center">
+                        {item.cover ? (
+                          <img
+                            src={item.cover}
+                            alt="cover"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <HugeiconsIcon
+                            icon={ImageOff}
+                            size={16}
+                            className="text-foreground/20"
+                          />
+                        )}
+                      </div>
+                      <div className="flex flex-col w-8/12 justify-center items-start">
+                        <h3 className="font-semibold line-clamp-1">
+                          {item.title}
+                        </h3>
+                        <Description className="line-clamp-2">
+                          {item.excerpt}
+                        </Description>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
+
+              {loadingRelatedBlogs &&
+                Array(5)
+                  .fill(null)
+                  .map((_, idx: number) => (
+                    <Skeleton
+                      key={idx}
+                      className="aspect-16/4 rounded-2xl"
+                    ></Skeleton>
+                  ))}
+            </div>
+          </div>
+
+          {!isLoading ? (
+            <div className="px-8 pb-20 flex justify-center items-center flex-1">
+              <div className="w-full h-full bg-accent rounded-3xl relative overflow-hidden">
+                <div className="absolute border border-white -translate-x-1/2 -translate-y-1/2 w-4/5 opacity-20 aspect-square rounded-full"></div>
+                <div className="absolute border border-white translate-x-1/2 translate-y-1/2 w-4/5 opacity-20 aspect-square rounded-full"></div>
+              </div>
+            </div>
+          ) : (
+            <div className="px-8 pb-20 flex justify-center items-center flex-1">
+              <Skeleton className="w-full h-full rounded-3xl relative overflow-hidden"></Skeleton>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default BlogPage;

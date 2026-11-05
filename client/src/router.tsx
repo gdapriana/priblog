@@ -1,16 +1,18 @@
 import { createBrowserRouter } from "react-router";
 import Homepage from "./pages/home.page";
-import Blogpage from "./pages/blogs.page";
+import Blogspage from "./pages/blogs.page";
 import { AuthLayout, MainLayout } from "./layout";
 import RegisterAuthPage from "./pages/auth/register.auth.page";
 import LoginAuthPage from "./pages/auth/login.auth.page";
+import BlogPage from "./pages/blog.page";
 
 const router = createBrowserRouter([
   {
     Component: MainLayout,
     children: [
       { index: true, Component: Homepage },
-      { path: "blogs", Component: Blogpage },
+      { path: "blogs", Component: Blogspage },
+      { path: "/blogs/:slug", Component: BlogPage },
     ],
   },
   {

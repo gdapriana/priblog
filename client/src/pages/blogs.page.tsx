@@ -1,76 +1,229 @@
-import { Button, ButtonGroup, ListBox, Select } from "@heroui/react";
+import {
+  Button,
+  ButtonGroup,
+  buttonVariants,
+  cn,
+  Description,
+  ListBox,
+  Select,
+  Tooltip,
+} from "@heroui/react";
 import { orderBy } from "../utils/hook.utils";
-import { blogSortBy } from "../hooks/use.blog.hook";
+import {
+  blogSortBy,
+  useQueryBlog,
+  type FilterBlog,
+} from "../hooks/use.blog.hook";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ChevronLeft, ChevronRight } from "@hugeicons/core-free-icons";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileStackFreeIcons,
+  ImageOff,
+  User,
+} from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import type { Blog } from "../data/type.data";
+import { Link } from "react-router";
+import ArrowUpNarrowWideIcon from "@hugeicons/core-free-icons/ArrowUpNarrowWideIcon";
+import ArrowDownNarrowWideIcon from "@hugeicons/core-free-icons/ArrowDownNarrowWideIcon";
 
-export const Blogpage = () => {
-  // const { data, isLoading } = useBlogsQuery();
+const Blogspage = () => {
+  const [query, setQuery] = useState<FilterBlog>({
+    take: 6,
+  });
+  const [cursors, setCursors] = useState<string[]>([]);
+  const { data: blogs, isLoading } = useQueryBlog({ filter: query });
+
   return (
-    <main className="flex flex-col justify-start items-stretch">
+    <main className="flex h-full flex-col justify-start items-stretch">
       <div className="p-6 md:8 flex justify-between items-center">
         <div className="flex justify-end items-center gap-2">
-          <Select defaultValue={orderBy[0]}>
-            <Select.Trigger>
-              <Select.Value className="capitalize" />
-              <Select.Indicator />
-            </Select.Trigger>
+          <Tooltip delay={0}>
+            <Select
+              defaultValue={orderBy[0]}
+              onChange={(val) =>
+                setQuery((prev) => ({
+                  ...prev,
+                  orderBy: val as (typeof orderBy)[number],
+                }))
+              }
+              isDisabled={isLoading}
+            >
+              <Select.Trigger>
+                <Select.Value className="capitalize">
+                  <HugeiconsIcon
+                    size={16}
+                    icon={
+                      query.orderBy === "asc"
+                        ? ArrowUpNarrowWideIcon
+                        : ArrowDownNarrowWideIcon
+                    }
+                  />
+                </Select.Value>
+                <Select.Indicator />
+              </Select.Trigger>
 
-            <Select.Popover>
-              <ListBox>
-                {orderBy.map((item: string, idx: number) => (
-                  <ListBox.Item
-                    key={idx}
-                    className="capitalize"
-                    id={item}
-                    textValue={item}
-                  >
-                    {item}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </Select.Popover>
-          </Select>
-          <Select defaultValue={blogSortBy[0]}>
-            <Select.Trigger>
-              <Select.Value className="capitalize" />
-              <Select.Indicator />
-            </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  {orderBy.map((item: string, idx: number) => (
+                    <ListBox.Item
+                      key={idx}
+                      className="capitalize"
+                      id={item}
+                      textValue={item}
+                    >
+                      <HugeiconsIcon
+                        size={16}
+                        icon={
+                          item === "asc"
+                            ? ArrowUpNarrowWideIcon
+                            : ArrowDownNarrowWideIcon
+                        }
+                      />
+                      {item}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+            <Tooltip.Content>Order By</Tooltip.Content>
+          </Tooltip>
 
-            <Select.Popover>
-              <ListBox>
-                {blogSortBy.map((item: string, idx: number) => (
-                  <ListBox.Item
-                    className="capitalize"
-                    id={item}
-                    textValue={item}
-                    key={idx}
-                  >
-                    {item}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                ))}
-              </ListBox>
-            </Select.Popover>
-          </Select>
+          <Tooltip delay={0}>
+            <Select
+              defaultValue={blogSortBy[0]}
+              isDisabled={isLoading}
+              onChange={(val) =>
+                setQuery((prev) => ({
+                  ...prev,
+                  sortBy: val as (typeof blogSortBy)[number],
+                }))
+              }
+            >
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+
+              <Select.Popover>
+                <ListBox>
+                  {blogSortBy.map((item: string, idx: number) => (
+                    <ListBox.Item
+                      className="capitalize"
+                      id={item}
+                      textValue={item}
+                      key={idx}
+                    >
+                      {item
+                        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+                        .replace(/^./, (c) => c.toUpperCase())}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+
+            <Tooltip.Content>Sort By</Tooltip.Content>
+          </Tooltip>
         </div>
-        <div className="flex flex-col gap-2">
-          <ButtonGroup variant="outline">
-            <Button>
+        <ButtonGroup variant="outline" isDisabled={isLoading}>
+          <Tooltip delay={0}>
+            <Button
+              variant="outline"
+              isDisabled={cursors.length === 0}
+              onPress={() => {
+                const last = cursors[cursors.length - 1];
+                setCursors((c) => c.slice(0, -1));
+                setQuery((q) => ({ ...q, cursor: last || undefined }));
+              }}
+            >
               <HugeiconsIcon icon={ChevronLeft} />
-              Previous
             </Button>
-            <Button>
-              <ButtonGroup.Separator />
-              Next
+            <Tooltip.Content>Previous Page</Tooltip.Content>
+          </Tooltip>
+          <ButtonGroup.Separator />
+
+          <Tooltip delay={0}>
+            <Button
+              variant="outline"
+              isDisabled={isLoading || !blogs?.data?.hasMore}
+              onPress={() => {
+                setCursors((prev) => [...prev, query.cursor ?? ""]);
+                setQuery((prev) => ({
+                  ...prev,
+                  cursor: blogs.data.nextCursor ?? undefined,
+                }));
+              }}
+            >
               <HugeiconsIcon icon={ChevronRight} />
             </Button>
-          </ButtonGroup>
-        </div>
+            <Tooltip.Content>Next Page</Tooltip.Content>
+          </Tooltip>
+        </ButtonGroup>
+      </div>
+      <div className="flex-1 p-6 md:p-8 pt-0 md:pt-0 gap-4 grid grid-cols-2 sm:grid-cols-3 grid-rows-3 sm:grid-rows-2">
+        {!isLoading &&
+          blogs &&
+          blogs.data &&
+          blogs.data.items &&
+          blogs.data.items.map((item: Blog, idx: number) => (
+            <Link to={`/blogs/${item.slug}`} key={idx} className="flex">
+              <article className="w-full h-full flex flex-col gap-4 justify-start items-stretch">
+                <div
+                  className={cn(
+                    "h-3/5 flex justify-center items-center rounded-3xl overflow-hidden",
+                    !item.cover && "border border-foreground/5",
+                  )}
+                >
+                  {item.cover ? (
+                    <img src={item.cover} alt="cover" />
+                  ) : (
+                    <HugeiconsIcon
+                      icon={ImageOff}
+                      className="text-foreground/10"
+                    />
+                  )}
+                </div>
+
+                <div className="flex flex-col justify-start items-start gap-2">
+                  <h3 className="font-semibold line-clamp-1">{item.title}</h3>
+                  <Description className="line-clamp-1 md:line-clamp-2 ">
+                    {item.excerpt}
+                  </Description>
+                  <div className="flex md:mt-4 justify-start items-center gap-2">
+                    <Button size="sm">
+                      <HugeiconsIcon icon={User} />
+                      {item.user.name.length > 5
+                        ? item.user.name.substring(0, 7) + "..."
+                        : item.user.name}
+                    </Button>
+                    <Link
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: "outline",
+                        className: "hidden md:flex",
+                      })}
+                      to={`/categories/${item.category.slug}`}
+                    >
+                      <HugeiconsIcon icon={FileStackFreeIcons} />
+                      <Tooltip delay={0}>
+                        {item.category.title.length > 5
+                          ? `${item.category.title.substring(0, 5)}...`
+                          : item.category.title}
+                        <Tooltip.Content>{item.category.title}</Tooltip.Content>
+                      </Tooltip>
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          ))}
       </div>
     </main>
   );
 };
 
-export default Blogpage;
+export default Blogspage;

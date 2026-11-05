@@ -10,10 +10,10 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Button, Description, Skeleton } from "@heroui/react";
 import moment from "moment";
-import { useBlogsQuery } from "../../hooks/use.blog.hook";
+import { useQueryBlog } from "../../hooks/use.blog.hook";
 
 export const NewBlogHome = () => {
-  const { data, isLoading } = useBlogsQuery({
+  const { data, isLoading } = useQueryBlog({
     filter: {
       take: 6,
       sortBy: "createdAt",
@@ -69,12 +69,12 @@ export const NewBlogHome = () => {
                           size: "sm",
                           variant: "outline",
                         })}
-                        to={`/categories/${item.category.slug}`}
+                        to={`/categories/${item.category?.slug}`}
                       >
                         <HugeiconsIcon icon={FileStackFreeIcons} />
-                        {item.category.title.length > 5
-                          ? `${item.category.title.substring(0, 5)}...`
-                          : item.category.title}
+                        {item.category?.title.length > 5
+                          ? `${item.category?.title.substring(0, 5)}...`
+                          : item.category?.title}
                       </Link>
                       <Button
                         variant="ghost"

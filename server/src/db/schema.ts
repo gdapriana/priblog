@@ -133,6 +133,10 @@ export type CategoryCreateResponse = Pick<Category, "id">;
 export type CategoryUpdateResponse = Pick<Category, "id">;
 export type CategoryDeleteResponse = Pick<Category, "id">;
 
+export type BlogGetResponse = Blog & {
+  category: Pick<Category, "id" | "title" | "slug"> | null;
+  user: Pick<User, "name" | "id" | "email"> | null;
+};
 export type BlogQueryResponse = Blog & {
   category: Pick<Category, "id" | "title" | "slug"> | null;
   user: Pick<User, "name" | "id" | "email"> | null;
