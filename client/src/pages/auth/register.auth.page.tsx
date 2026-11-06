@@ -10,7 +10,7 @@ import {
   Label,
   TextField,
 } from "@heroui/react";
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import {
   nameValidation,
   passwordValidation,
@@ -23,11 +23,51 @@ import {
   Login,
 } from "@hugeicons/core-free-icons";
 import { Link } from "react-router";
+import { useAuth } from "../../context/auth.context";
+import { ApiError } from "../../utils/api.utils";
+import type { RegisterInput } from "../../data/type.data";
+
+type FieldErrors = Partial<Record<keyof RegisterInput, string>>;
 
 const RegisterAuthPage = () => {
   const [hidePassword, setHidePassword] = useState<boolean>(false);
+  const { register, login } = useAuth();
+  const [form, setForm] = useState<RegisterInput>({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setFieldErrors({});
+    setLoading(true);
+    try {
+      await register(form);
+      await login({ email: form.email, password: form.password });
+    } catch (e) {
+      if (e instanceof ApiError && e.errors) {
+        const map: FieldErrors = {};
+        for (const issue of e.errors)
+          map[issue.path as keyof RegisterInput] = issue.message;
+      } else {
+        setError(e instanceof Error ? e.message : "something went wrong");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Form className="w-full max-w-96 px-4">
+    <Form onSubmit={onSubmit} className="w-full max-w-96 px-4">
       <Fieldset>
         <Fieldset.Legend className="font-medium text-center text-neutral-800 dark:text-neutral-100">
           Register
@@ -41,12 +81,22 @@ const RegisterAuthPage = () => {
         <Fieldset.Group>
           <TextField isRequired name="name" validate={nameValidation}>
             <Label>Name</Label>
-            <Input placeholder="John Doe" variant="primary" />
+            <Input
+              value={form.name}
+              onChange={onChange}
+              placeholder="John Doe"
+              variant="primary"
+            />
             <FieldError />
           </TextField>
           <TextField isRequired name="email" type="email">
             <Label>Email</Label>
-            <Input placeholder="johndoe@example" variant="primary" />
+            <Input
+              value={form.email}
+              onChange={onChange}
+              placeholder="johndoe@example"
+              variant="primary"
+            />
             <FieldError />
           </TextField>
 
@@ -58,7 +108,11 @@ const RegisterAuthPage = () => {
           >
             <Label>Password</Label>
             <InputGroup fullWidth>
-              <InputGroup.Input placeholder="********" />
+              <InputGroup.Input
+                value={form.password}
+                onChange={onChange}
+                placeholder="********"
+              />
               <InputGroup.Suffix
                 className="cursor-pointer"
                 onClick={() => setHidePassword(!hidePassword)}
@@ -77,7 +131,12 @@ const RegisterAuthPage = () => {
             <HugeiconsIcon icon={ArrowLeft} />
             Cancel
           </Link>
-          <Button className="flex-1" variant="primary" type="submit">
+          <Button
+            isDisabled={loading}
+            className="flex-1"
+            variant="primary"
+            type="submit"
+          >
             Create Account
             <HugeiconsIcon icon={Login} />
           </Button>

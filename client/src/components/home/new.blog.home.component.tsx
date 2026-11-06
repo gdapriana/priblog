@@ -27,9 +27,9 @@ export const NewBlogHome = () => {
       )}
     >
       {data &&
-        data.data &&
-        data.data.items &&
-        data.data.items.map((item: Blog, idx: number) => (
+        data &&
+        data.items &&
+        data.items.map((item: Blog, idx: number) => (
           <Link
             to={`/blogs/${item.slug}`}
             key={idx}
@@ -93,7 +93,7 @@ export const NewBlogHome = () => {
                   <article
                     className={cn(
                       "flex flex-row justify-center gap-4 items-stretch py-4 border-foreground/10",
-                      idx !== data.data.items.length - 1 && "border-b",
+                      idx !== data.items.length - 1 && "border-b",
                     )}
                   >
                     <div className="h-full max-h-20 overflow-hidden aspect-video video bg-foreground/10 rounded-xl flex justify-center items-center">

@@ -36,9 +36,49 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
+export interface ApiSuccess<T> {
+  success: true;
+  message: string;
+  statusCode: number;
+  data: T;
+}
+
 export interface QueryResponse<T> {
   items: T[];
   nextCursor: string | null;
   hasMore: boolean;
   totalData?: number;
+}
+
+export type UserRole = "ADMIN" | "USER";
+
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface ValidationIssue {
+  path: string;
+  message: string;
+  code: string;
+}
+
+export interface ApiFailure {
+  success: false;
+  message: string;
+  statusCode: number;
+  errors?: ValidationIssue[];
+}
+
+export interface RegisterInput {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
 }

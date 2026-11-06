@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import BloggerIcon from "@hugeicons/core-free-icons/BloggerIcon";
 import StackStarIcon from "@hugeicons/core-free-icons/StackStarIcon";
 import { Button } from "@heroui/react";
+import { useAuth } from "./context/auth.context";
 
 export const MainLayout = () => {
   return (
@@ -71,12 +72,12 @@ export const MainLayout = () => {
 };
 
 export const AuthLayout = () => {
-  const [authenticated] = useState(false);
+  const { status } = useAuth();
 
-  if (authenticated) {
+  if (status === "loading") return <div>loading...</div>;
+  if (status === "authenticated") {
     return <Navigate to="/" />;
   }
-
   return (
     <main className="h-dvh flex justify-center items-center">
       <Outlet />

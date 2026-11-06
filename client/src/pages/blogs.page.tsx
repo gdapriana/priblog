@@ -160,12 +160,12 @@ const Blogspage = () => {
           <Tooltip delay={0}>
             <Button
               variant="outline"
-              isDisabled={isLoading || !blogs?.data?.hasMore}
+              isDisabled={isLoading || !blogs?.hasMore}
               onPress={() => {
                 setCursors((prev) => [...prev, query.cursor ?? ""]);
                 setQuery((prev) => ({
                   ...prev,
-                  cursor: blogs?.data?.nextCursor ?? undefined,
+                  cursor: blogs?.nextCursor ?? undefined,
                 }));
               }}
             >
@@ -178,9 +178,9 @@ const Blogspage = () => {
       <div className="flex-1 p-6 md:p-8 pt-0 md:pt-0 gap-4 grid grid-cols-2 sm:grid-cols-3 grid-rows-3 sm:grid-rows-2">
         {!isLoading &&
           blogs &&
-          blogs.data &&
-          blogs.data.items &&
-          blogs.data.items.map((item: Blog, idx: number) => (
+          blogs &&
+          blogs.items &&
+          blogs.items.map((item: Blog, idx: number) => (
             <Link to={`/blogs/${item.slug}`} key={idx} className="flex">
               <article className="w-full h-full flex flex-col gap-4 justify-start items-stretch">
                 <div

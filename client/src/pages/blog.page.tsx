@@ -141,9 +141,9 @@ const BlogPage = () => {
                 <div className="flex justify-start flex-col items-stretch gap-2">
                   {!loadingRelatedBlogs &&
                     relatedBlogs &&
-                    relatedBlogs.data &&
-                    relatedBlogs.data.items &&
-                    relatedBlogs.data.items.map((item: Blog, idx: number) => (
+                    relatedBlogs &&
+                    relatedBlogs.items &&
+                    relatedBlogs.items.map((item: Blog, idx: number) => (
                       <Link
                         to={`/blogs/${item.slug}`}
                         key={idx}
@@ -203,9 +203,9 @@ const BlogPage = () => {
             <div className="flex justify-start flex-col items-stretch gap-2">
               {!loadingRelatedBlogs &&
                 relatedBlogs &&
-                relatedBlogs.data &&
-                relatedBlogs.data.items &&
-                relatedBlogs.data.items.map((item: Blog, idx: number) => (
+                relatedBlogs &&
+                relatedBlogs.items &&
+                relatedBlogs.items.map((item: Blog, idx: number) => (
                   <Link to={`/blogs/${item.slug}`} key={idx} className="flex">
                     <article
                       className={cn(
