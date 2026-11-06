@@ -3,11 +3,11 @@ import { Link } from "react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { BloggerFreeIcons, ImageOff } from "@hugeicons/core-free-icons";
 import type { Category } from "../../data/type.data";
-import { useCategoriesQuery } from "../../hooks/use.category.hook";
+import { useQueryCategory } from "../../hooks/use.category.hook";
 import { Skeleton } from "@heroui/react";
 
 export const CategoryHome = () => {
-  const { data, isLoading } = useCategoriesQuery({
+  const { data, isLoading } = useQueryCategory({
     filter: { take: 4 },
   });
   return (

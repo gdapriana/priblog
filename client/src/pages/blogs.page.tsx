@@ -6,6 +6,7 @@ import {
   Description,
   ListBox,
   Select,
+  Skeleton,
   Tooltip,
 } from "@heroui/react";
 import { orderBy } from "../utils/hook.utils";
@@ -22,18 +23,29 @@ import {
   ImageOff,
   User,
 } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Blog } from "../data/type.data";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import ArrowUpNarrowWideIcon from "@hugeicons/core-free-icons/ArrowUpNarrowWideIcon";
 import ArrowDownNarrowWideIcon from "@hugeicons/core-free-icons/ArrowDownNarrowWideIcon";
 
 const Blogspage = () => {
+  const [searchParams] = useSearchParams();
+  const categoryId = searchParams.get("categoryId") ?? null;
   const [query, setQuery] = useState<FilterBlog>({
     take: 6,
   });
   const [cursors, setCursors] = useState<string[]>([]);
   const { data: blogs, isLoading } = useQueryBlog({ filter: query });
+
+  useEffect(() => {
+    if (categoryId) {
+      if (typeof categoryId !== "string" || categoryId.trim() === "") return;
+      if (!isNaN(Number(categoryId))) {
+        setQuery((prev) => ({ ...prev, categoryId: Number(categoryId) }));
+      }
+    }
+  }, [categoryId]);
 
   return (
     <main className="flex h-full flex-col justify-start items-stretch">
@@ -90,7 +102,6 @@ const Blogspage = () => {
             </Select>
             <Tooltip.Content>Order By</Tooltip.Content>
           </Tooltip>
-
           <Tooltip delay={0}>
             <Select
               defaultValue={blogSortBy[0]}
@@ -221,6 +232,17 @@ const Blogspage = () => {
               </article>
             </Link>
           ))}
+
+        {isLoading &&
+          Array(6)
+            .fill(null)
+            .map((_, idx: number) => (
+              <div className="flex gap-4 flex-col justify-start items-stretch">
+                <Skeleton key={idx} className="rounded-3xl w-full h-3/5" />
+                <Skeleton key={idx} className="rounded-3xl w-full h-2/12" />
+                <Skeleton key={idx} className="rounded-3xl w-full h-1/12" />
+              </div>
+            ))}
       </div>
     </main>
   );

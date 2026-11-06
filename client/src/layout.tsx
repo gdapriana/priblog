@@ -33,7 +33,7 @@ export const MainLayout = () => {
                     variant: "ghost",
                     className: "justify-between hover:bg-foreground/5",
                   })}
-                  to="/blogs"
+                  to="/categories"
                 >
                   Categories <HugeiconsIcon icon={StackStarIcon} />
                 </Link>

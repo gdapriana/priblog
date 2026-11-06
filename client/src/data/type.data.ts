@@ -40,4 +40,5 @@ export interface QueryResponse<T> {
   items: T[];
   nextCursor: string | null;
   hasMore: boolean;
+  totalData?: number;
 }

@@ -5,6 +5,7 @@ import { AuthLayout, MainLayout } from "./layout";
 import RegisterAuthPage from "./pages/auth/register.auth.page";
 import LoginAuthPage from "./pages/auth/login.auth.page";
 import BlogPage from "./pages/blog.page";
+import Categoriespage from "./pages/categories.page";
 
 const router = createBrowserRouter([
   {
@@ -12,6 +13,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, Component: Homepage },
       { path: "blogs", Component: Blogspage },
+      { path: "categories", Component: Categoriespage },
       { path: "/blogs/:slug", Component: BlogPage },
     ],
   },

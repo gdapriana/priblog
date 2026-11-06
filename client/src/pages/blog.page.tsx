@@ -3,6 +3,7 @@ import { useGetBlog, useQueryBlog } from "../hooks/use.blog.hook";
 import { buttonVariants, cn } from "@heroui/styles";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
+  Email,
   FileStackFreeIcons,
   ImageOff,
   Time,
@@ -250,9 +251,19 @@ const BlogPage = () => {
             </div>
           </div>
 
-          {!isLoading ? (
+          {!isLoading && blog ? (
             <div className="px-8 pb-20 flex justify-center items-center flex-1">
-              <div className="w-full h-full bg-accent rounded-3xl relative overflow-hidden">
+              <div className="w-full h-full flex-col gap-2 bg-accent rounded-3xl relative overflow-hidden flex p-6 md:p-8 justify-center items-center">
+                <h2 className="text-center text-accent-foreground font-bold text-lg">
+                  Get {blog?.data?.user?.name}'s stories in your inbox
+                </h2>
+                <Description className="text-center text-accent-foreground/60">
+                  Join for free to get updates from this writer.
+                </Description>
+                <Button variant="secondary" className="mt-4">
+                  <HugeiconsIcon icon={Email} />
+                  Subsribe
+                </Button>
                 <div className="absolute border border-white -translate-x-1/2 -translate-y-1/2 w-4/5 opacity-20 aspect-square rounded-full"></div>
                 <div className="absolute border border-white translate-x-1/2 translate-y-1/2 w-4/5 opacity-20 aspect-square rounded-full"></div>
               </div>

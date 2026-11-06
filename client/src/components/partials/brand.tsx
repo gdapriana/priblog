@@ -1,3 +1,9 @@
+import { Link } from "react-router";
+
 export const Brand = () => {
-  return <span className="font-bold uppercase tracking-tight">priblog</span>;
+  return (
+    <Link to="/" className="font-bold uppercase tracking-tight">
+      priblog
+    </Link>
+  );
 };
