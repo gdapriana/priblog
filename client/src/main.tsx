@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router/dom";
 import router from "./router.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/auth.context.tsx";
+import { Toast } from "@heroui/react";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ createRoot(document.getElementById("root")!).render(
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
+        <Toast.Provider placement="bottom" />
       </QueryClientProvider>
     </AuthProvider>
   </StrictMode>,

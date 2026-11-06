@@ -9,6 +9,7 @@ import {
   InputGroup,
   Label,
   TextField,
+  toast,
 } from "@heroui/react";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import {
@@ -22,7 +23,7 @@ import {
   EyeClosedFreeIcons,
   Login,
 } from "@hugeicons/core-free-icons";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../context/auth.context";
 import { ApiError } from "../../utils/api.utils";
 import type { RegisterInput } from "../../data/type.data";
@@ -32,6 +33,7 @@ type FieldErrors = Partial<Record<keyof RegisterInput, string>>;
 const RegisterAuthPage = () => {
   const [hidePassword, setHidePassword] = useState<boolean>(false);
   const { register, login } = useAuth();
+
   const [form, setForm] = useState<RegisterInput>({
     name: "",
     email: "",
@@ -41,6 +43,7 @@ const RegisterAuthPage = () => {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -50,25 +53,45 @@ const RegisterAuthPage = () => {
     setError("");
     setFieldErrors({});
     setLoading(true);
-    try {
-      await register(form);
-      await login({ email: form.email, password: form.password });
-    } catch (e) {
-      if (e instanceof ApiError && e.errors) {
-        const map: FieldErrors = {};
-        for (const issue of e.errors)
-          map[issue.path as keyof RegisterInput] = issue.message;
-      } else {
-        setError(e instanceof Error ? e.message : "something went wrong");
-      }
-    } finally {
-      setLoading(false);
-    }
+
+    toast.promise(register(form), {
+      error: (e) => {
+        setLoading(false);
+        if (e instanceof ApiError && e.errors) {
+          return e.errors[0].message;
+        }
+        return "Something went wrong";
+      },
+      loading: "Loading...",
+      success: () => {
+        toast.promise(login({ email: form.email, password: form.password }), {
+          success: () => {
+            navigate("/");
+            return "Success login";
+          },
+          error: (e) => {
+            const map: FieldErrors = {};
+            if (e instanceof ApiError && e.errors) {
+              for (const issue of e.errors) {
+                map[issue.path as keyof RegisterInput] = issue.message;
+              }
+
+              setFieldErrors(map);
+              return e.errors[0].message;
+            }
+            setLoading(false);
+            return "Something went wrong";
+          },
+          loading: "Please wait...",
+        });
+        return null;
+      },
+    });
   };
 
   return (
     <Form onSubmit={onSubmit} className="w-full max-w-96 px-4">
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm">{error}</p>}
 
       <Fieldset>
         <Fieldset.Legend className="font-medium text-center text-neutral-800 dark:text-neutral-100">
@@ -89,11 +112,7 @@ const RegisterAuthPage = () => {
               placeholder="John Doe"
               variant="primary"
             />
-
-            {fieldErrors.name && (
-              <p className="text-sm text-red-500">{fieldErrors.name}</p>
-            )}
-            <FieldError />
+            {fieldErrors.name && <FieldError>{fieldErrors.name}</FieldError>}
           </TextField>
           <TextField isRequired name="email" type="email">
             <Label>Email</Label>
@@ -103,9 +122,7 @@ const RegisterAuthPage = () => {
               placeholder="johndoe@example"
               variant="primary"
             />
-            {fieldErrors.email && (
-              <p className="text-sm text-red-500">{fieldErrors.email}</p>
-            )}
+            {fieldErrors.email && <FieldError>{fieldErrors.email}</FieldError>}
             <FieldError />
           </TextField>
 
@@ -132,7 +149,9 @@ const RegisterAuthPage = () => {
                 />
               </InputGroup.Suffix>
             </InputGroup>
-            <FieldError />
+            {fieldErrors.password && (
+              <FieldError>{fieldErrors.password}</FieldError>
+            )}
           </TextField>
         </Fieldset.Group>
         <Fieldset.Actions>
