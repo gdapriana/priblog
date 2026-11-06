@@ -39,7 +39,7 @@ const RegisterAuthPage = () => {
   });
 
   const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) =>
@@ -68,6 +68,8 @@ const RegisterAuthPage = () => {
 
   return (
     <Form onSubmit={onSubmit} className="w-full max-w-96 px-4">
+      {error && <p className="text-sm text-red-500">{error}</p>}
+
       <Fieldset>
         <Fieldset.Legend className="font-medium text-center text-neutral-800 dark:text-neutral-100">
           Register
@@ -87,6 +89,10 @@ const RegisterAuthPage = () => {
               placeholder="John Doe"
               variant="primary"
             />
+
+            {fieldErrors.name && (
+              <p className="text-sm text-red-500">{fieldErrors.name}</p>
+            )}
             <FieldError />
           </TextField>
           <TextField isRequired name="email" type="email">
@@ -97,6 +103,9 @@ const RegisterAuthPage = () => {
               placeholder="johndoe@example"
               variant="primary"
             />
+            {fieldErrors.email && (
+              <p className="text-sm text-red-500">{fieldErrors.email}</p>
+            )}
             <FieldError />
           </TextField>
 

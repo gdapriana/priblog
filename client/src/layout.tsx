@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, Navigate, Outlet } from "react-router";
 import { Header } from "./components/header.component";
 import { buttonVariants } from "@heroui/styles";
