@@ -14,11 +14,16 @@ export const createServiceBlog = async ({
   userId?: number;
 }): Promise<BlogCreateResponse> => {
   const validatedBody = BlogValidation.CREATE.parse({ userId, ...body });
+
+  const category = await db.query.categories.findFirst({
+    where: { id: validatedBody.categoryId },
+    columns: { id: true },
+  });
+  if (!category) throw ApiError.notFound(CRUD_MESSAGE.notFound("category"));
   const [blog] = await db
     .insert(blogs)
     .values({
       ...validatedBody,
-      categoryId: 1,
       slug: slugify(
         validatedBody.title + new Date().getTime().toString(),
         slugOptions,

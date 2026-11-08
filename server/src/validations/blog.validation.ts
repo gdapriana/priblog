@@ -19,7 +19,7 @@ export class BlogValidation {
     ...queryValidation({ sortEnum: ["id", "title", "createdAt"] }),
   });
   static GET = getValidation({ by: ["id", "slug"] });
-  static CREATE = createInsertSchema(blogs)
+  static CREATE = createInsertSchema(blogs, { categoryId: z.number() })
     .extend({
       userId: z.number(),
     })

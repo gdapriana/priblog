@@ -1,9 +1,6 @@
 import {
   Button,
   ButtonGroup,
-  buttonVariants,
-  cn,
-  Description,
   ListBox,
   Select,
   Skeleton,
@@ -16,16 +13,10 @@ import {
   type FilterBlog,
 } from "../hooks/use.blog.hook";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FileStackFreeIcons,
-  ImageOff,
-  User,
-} from "@hugeicons/core-free-icons";
+import { ChevronLeft, ChevronRight } from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
 import type { Blog } from "../data/type.data";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import ArrowUpNarrowWideIcon from "@hugeicons/core-free-icons/ArrowUpNarrowWideIcon";
 import ArrowDownNarrowWideIcon from "@hugeicons/core-free-icons/ArrowDownNarrowWideIcon";
 import BlogMainCard from "../components/partials/blog.main.card";

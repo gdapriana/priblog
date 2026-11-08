@@ -120,7 +120,7 @@ const CreateBlogpage = () => {
         <div className="p-6 md:p-8">
           <Typography.Prose>
             <MDXEditor
-              markdown={form.content}
+              markdown={form.content ?? ""}
               onChange={(val) => setForm((prev) => ({ ...prev, content: val }))}
               contentEditableClassName="prose dark:prose-invert"
               plugins={[
