@@ -82,3 +82,10 @@ export interface LoginInput {
   email: string;
   password: string;
 }
+
+export interface CreateBlogInput {
+  title: string;
+  categoryId?: number;
+  excerpt?: string | null | undefined;
+  content?: string | null | undefined;
+}

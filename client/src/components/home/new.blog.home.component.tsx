@@ -12,7 +12,7 @@ import { Button, Description, Skeleton } from "@heroui/react";
 import moment from "moment";
 import { useQueryBlog } from "../../hooks/use.blog.hook";
 
-export const NewBlogHome = () => {
+const NewBlogHome = () => {
   const { data, isLoading } = useQueryBlog({
     filter: {
       take: 6,
@@ -138,3 +138,5 @@ export const NewBlogHome = () => {
     </div>
   );
 };
+
+export default NewBlogHome;

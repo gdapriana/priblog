@@ -36,16 +36,15 @@ const BlogPage = () => {
   const { data: relatedBlogs, isLoading: loadingRelatedBlogs } = useQueryBlog({
     filter: {
       take: 5,
-      categoryId:
-        blog && blog.data && blog.data.category && blog.data.category.id,
+      categoryId: blog && blog.category && blog.category.id,
     },
-    enabled: blog && blog.success,
+    enabled: blog !== undefined,
   });
 
   return (
     <main className="flex h-full relative flex-col justify-start items-stretch">
-      {!isLoading && blog && !blog.success && (
-        <div className="w-full h-full z-2 absolute top-0 left-0 flex-col flex justify-center gap-2 items-center">
+      {!isLoading && !blog && (
+        <div className="w-full h-full bg-accent-foreground z-2 absolute top-0 left-0 flex-col flex justify-center gap-2 items-center">
           <p>No resource found</p>
           <Link className={buttonVariants({ variant: "primary" })} to={"/"}>
             Back home
@@ -54,13 +53,13 @@ const BlogPage = () => {
       )}
 
       <div className="w-full grid grid-cols-1 grid-rows-1 md:grid-cols-[2fr_1fr] h-full">
-        {!isLoading && blog && blog.success && blog.data && (
+        {!isLoading && blog && (
           <div className="h-full w-full overflow-auto">
             <div className="flex flex-col justify-start items-stretch">
               <div className="p-6 md:p-8 flex flex-col justify-start items-stretch gap-4">
                 <div className="flex w-full aspect-video bg-foreground/5  justify-center items-center rounded-3xl">
-                  {blog.data?.cover ? (
-                    <img src={blog.data?.cover ?? ""} alt="cover" />
+                  {blog?.cover ? (
+                    <img src={blog?.cover ?? ""} alt="cover" />
                   ) : (
                     <HugeiconsIcon
                       icon={ImageOff}
@@ -69,28 +68,26 @@ const BlogPage = () => {
                     />
                   )}
                 </div>
-                <h1 className="font-bold text-xl">{blog.data.title}</h1>
-                <Description className="text-sm">
-                  {blog.data.excerpt}
-                </Description>
+                <h1 className="font-bold text-xl">{blog.title}</h1>
+                <Description className="text-sm">{blog.excerpt}</Description>
               </div>
               <div className="flex flex-col justify-start items-stretch gap-4">
                 <div className="p-6 md:p-8 flex gap-2 justify-center items-center border-y border-foreground/5">
                   <Button size="sm">
                     <HugeiconsIcon icon={User} />
-                    {blog.data.user?.name}
+                    {blog.user?.name}
                   </Button>
                   <Link
                     className={buttonVariants({
                       size: "sm",
                       variant: "outline",
                     })}
-                    to={`/categories/${blog.data.category?.slug}`}
+                    to={`/categories/${blog.category?.slug}`}
                   >
                     <HugeiconsIcon icon={FileStackFreeIcons} />
-                    {blog.data.category?.title.length > 5
-                      ? `${blog.data.category?.title.substring(0, 5)}...`
-                      : blog.data.category?.title}
+                    {blog.category?.title.length > 5
+                      ? `${blog.category?.title.substring(0, 5)}...`
+                      : blog.category?.title}
                   </Link>
                   <Button
                     variant="ghost"
@@ -98,16 +95,16 @@ const BlogPage = () => {
                     size="sm"
                   >
                     <HugeiconsIcon icon={Time} />
-                    {moment(blog.data.createdAt).fromNow()}
+                    {moment(blog.createdAt).fromNow()}
                   </Button>
                 </div>
               </div>
 
               <div className="p-6 md:p-8 font-sans">
-                {blog.data.content ? (
+                {blog.content ? (
                   <Typography.Prose>
                     <MDXEditor
-                      markdown={blog.data.content}
+                      markdown={blog.content}
                       readOnly
                       contentEditableClassName="prose dark:prose-invert"
                       plugins={[
@@ -255,7 +252,7 @@ const BlogPage = () => {
             <div className="px-8 pb-20 flex justify-center items-center flex-1">
               <div className="w-full h-full flex-col gap-2 bg-accent rounded-3xl relative overflow-hidden flex p-6 md:p-8 justify-center items-center">
                 <h2 className="text-center text-accent-foreground font-bold text-lg">
-                  Get {blog?.data?.user?.name}'s stories in your inbox
+                  Get {blog?.user?.name}'s stories in your inbox
                 </h2>
                 <Description className="text-center text-accent-foreground/60">
                   Join for free to get updates from this writer.

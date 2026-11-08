@@ -21,7 +21,9 @@ body {
 @layer components {
   .input,
   .input-group,
-  .select__trigger {
+  .select__trigger,
+  .textarea,
+  .autocomplete__trigger {
     @apply shadow-none border border-foreground/5 rounded-full;
   }
   .select__popover {

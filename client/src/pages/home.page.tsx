@@ -1,5 +1,5 @@
-import { NewBlogHome } from "../components/home/new.blog.home.component";
-import { CategoryHome } from "../components/home/category.home.component";
+import NewBlogHome from "../components/home/new.blog.home.component";
+import CategoryHome from "../components/home/category.home.component";
 import { Avatar, AvatarGroup, Button } from "@heroui/react";
 import { users } from "../data/users.dummy.data";
 

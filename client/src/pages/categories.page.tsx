@@ -1,11 +1,4 @@
-import {
-  Button,
-  ButtonGroup,
-  cn,
-  ListBox,
-  Skeleton,
-  Tooltip,
-} from "@heroui/react";
+import { Button, ButtonGroup, ListBox, Skeleton, Tooltip } from "@heroui/react";
 import { orderBy } from "../utils/hook.utils";
 import { useState } from "react";
 import {
@@ -17,14 +10,9 @@ import { Select } from "@heroui/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowUpNarrowWideIcon from "@hugeicons/core-free-icons/ArrowUpNarrowWideIcon";
 import ArrowDownNarrowWideIcon from "@hugeicons/core-free-icons/ArrowDownNarrowWideIcon";
-import {
-  BloggerFreeIcons,
-  ChevronLeft,
-  ChevronRight,
-  ImageOff,
-} from "@hugeicons/core-free-icons";
+import { ChevronLeft, ChevronRight } from "@hugeicons/core-free-icons";
 import type { Category } from "../data/type.data";
-import { Link } from "react-router";
+import CategoryCard from "../components/partials/category.card";
 
 const Categoriespage = () => {
   const [query, setQuery] = useState<FilterCategory>({
@@ -148,12 +136,12 @@ const Categoriespage = () => {
           <Tooltip delay={0}>
             <Button
               variant="outline"
-              isDisabled={isLoading || !categories?.data?.hasMore}
+              isDisabled={isLoading || !categories?.hasMore}
               onPress={() => {
                 setCursors((prev) => [...prev, query.cursor ?? ""]);
                 setQuery((prev) => ({
                   ...prev,
-                  cursor: categories?.data?.nextCursor ?? undefined,
+                  cursor: categories?.nextCursor ?? undefined,
                 }));
               }}
             >
@@ -166,69 +154,10 @@ const Categoriespage = () => {
       <div className="flex-1 p-6 md:p-8 pt-0 md:pt-0 gap-4 grid grid-cols-2 sm:grid-cols-4 grid-rows-4 sm:grid-rows-2">
         {!isLoading &&
           categories &&
-          categories.data &&
-          categories.data.items &&
-          categories.data.items.map((item: Category, idx: number) => (
-            <Link
-              key={idx}
-              to={`/blogs?categoryId=${item.id}`}
-              className="flex"
-            >
-              <article className="aspect-12/16 border border-foreground/10 overflow-hidden rounded-2xl w-full relative flex justify-center items-center">
-                {item.cover ? (
-                  <img
-                    src={item.cover}
-                    alt="cover"
-                    className="w-full h-full z-1 object-cover"
-                  />
-                ) : (
-                  <HugeiconsIcon
-                    icon={ImageOff}
-                    size={16}
-                    className="text-foreground/20"
-                  />
-                )}
-
-                {item.cover && (
-                  <div className="absolute bottom-0 z-2 w-full h-1/2 bg-linear-to-t from-foreground/80 to-transparent"></div>
-                )}
-
-                <div className="absolute w-full z-3 bottom-0 p-6">
-                  <div className="flex flex-col justify-start items-start gap-2">
-                    <h2
-                      className={cn(
-                        "font-semibold text-lg line-clamp-1",
-                        item.cover
-                          ? "text-accent-foreground"
-                          : "text-foreground",
-                      )}
-                    >
-                      {item.title}
-                    </h2>
-                    <div className="flex justify-center text-xs items-center gap-1">
-                      <HugeiconsIcon
-                        className={cn(
-                          item.cover
-                            ? "text-accent-foreground/70"
-                            : "text-foreground/70",
-                        )}
-                        icon={BloggerFreeIcons}
-                        size={14}
-                      />{" "}
-                      <span
-                        className={cn(
-                          item.cover
-                            ? "text-accent-foreground/70"
-                            : "text-foreground/70",
-                        )}
-                      >
-                        {item?._count?.blog} Blogs
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </Link>
+          categories &&
+          categories.items &&
+          categories.items.map((item: Category, idx: number) => (
+            <CategoryCard key={idx} category={item} />
           ))}
 
         {isLoading &&

@@ -1,7 +1,8 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { QUERY_KEYS } from "../constants/query.keys.constant";
 import { buildQuery } from "../utils/query.utils";
-import type { ApiResponse, Category, QueryResponse } from "../data/type.data";
+import { api } from "../utils/api.utils";
+import type { Category, QueryResponse } from "../data/type.data";
 
 export const categorySortBy = ["createdAt", "title"] as const;
 
@@ -18,17 +19,14 @@ export const useQueryCategory = ({
   filter,
 }: {
   filter?: FilterCategory;
-} = {}): UseQueryResult<ApiResponse<QueryResponse<Category>>, Error> => {
+} = {}): UseQueryResult<QueryResponse<Category>, Error> => {
   return useQuery({
     queryKey: [QUERY_KEYS.categories.all, filter],
     queryFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/categories/query?${buildQuery(filter)}`,
-        {
-          method: "GET",
-        },
+      const res = await api<QueryResponse<Category>>(
+        `/api/categories/query?${buildQuery(filter)}`,
       );
-      return res.json();
+      return res;
     },
   });
 };

@@ -6,6 +6,9 @@ import RegisterAuthPage from "./pages/auth/register.auth.page";
 import LoginAuthPage from "./pages/auth/login.auth.page";
 import BlogPage from "./pages/blog.page";
 import Categoriespage from "./pages/categories.page";
+import { ProtectedRoute } from "./routes/protected.route";
+import CreateBlogpage from "./pages/create.blog.page";
+import Profilepage from "./pages/profile.page";
 
 const router = createBrowserRouter([
   {
@@ -14,7 +17,15 @@ const router = createBrowserRouter([
       { index: true, Component: Homepage },
       { path: "blogs", Component: Blogspage },
       { path: "categories", Component: Categoriespage },
-      { path: "/blogs/:slug", Component: BlogPage },
+      { path: "blogs/:slug", Component: BlogPage },
+      {
+        Component: ProtectedRoute,
+        children: [{ path: "create", Component: CreateBlogpage }],
+      },
+      {
+        Component: ProtectedRoute,
+        children: [{ path: "profile", Component: Profilepage }],
+      },
     ],
   },
   {

@@ -28,6 +28,7 @@ import type { Blog } from "../data/type.data";
 import { Link, useSearchParams } from "react-router";
 import ArrowUpNarrowWideIcon from "@hugeicons/core-free-icons/ArrowUpNarrowWideIcon";
 import ArrowDownNarrowWideIcon from "@hugeicons/core-free-icons/ArrowDownNarrowWideIcon";
+import BlogMainCard from "../components/partials/blog.main.card";
 
 const Blogspage = () => {
   const [searchParams] = useSearchParams();
@@ -181,56 +182,7 @@ const Blogspage = () => {
           blogs &&
           blogs.items &&
           blogs.items.map((item: Blog, idx: number) => (
-            <Link to={`/blogs/${item.slug}`} key={idx} className="flex">
-              <article className="w-full h-full flex flex-col gap-4 justify-start items-stretch">
-                <div
-                  className={cn(
-                    "h-3/5 flex justify-center items-center rounded-3xl overflow-hidden",
-                    !item.cover && "border border-foreground/5",
-                  )}
-                >
-                  {item.cover ? (
-                    <img src={item.cover} alt="cover" />
-                  ) : (
-                    <HugeiconsIcon
-                      icon={ImageOff}
-                      className="text-foreground/10"
-                    />
-                  )}
-                </div>
-
-                <div className="flex flex-col justify-start items-start gap-2">
-                  <h3 className="font-semibold line-clamp-1">{item.title}</h3>
-                  <Description className="line-clamp-1 md:line-clamp-2 ">
-                    {item.excerpt}
-                  </Description>
-                  <div className="flex md:mt-4 justify-start items-center gap-2">
-                    <Button size="sm">
-                      <HugeiconsIcon icon={User} />
-                      {item.user.name.length > 5
-                        ? item.user.name.substring(0, 7) + "..."
-                        : item.user.name}
-                    </Button>
-                    <Link
-                      className={buttonVariants({
-                        size: "sm",
-                        variant: "outline",
-                        className: "hidden md:flex",
-                      })}
-                      to={`/categories/${item.category.slug}`}
-                    >
-                      <HugeiconsIcon icon={FileStackFreeIcons} />
-                      <Tooltip delay={0}>
-                        {item.category.title.length > 5
-                          ? `${item.category.title.substring(0, 5)}...`
-                          : item.category.title}
-                        <Tooltip.Content>{item.category.title}</Tooltip.Content>
-                      </Tooltip>
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            </Link>
+            <BlogMainCard key={idx} blog={item} />
           ))}
 
         {isLoading &&

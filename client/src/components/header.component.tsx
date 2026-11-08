@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { Brand } from "./partials/brand";
 import { buttonVariants } from "@heroui/styles";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Login, Plus, Search } from "@hugeicons/core-free-icons";
+import { Plus, Search } from "@hugeicons/core-free-icons";
 import { InputGroup } from "@heroui/react";
 
 export const Header = () => {
@@ -27,13 +27,6 @@ export const Header = () => {
               >
                 <HugeiconsIcon icon={Plus} />
                 Create Blog
-              </Link>
-              <Link
-                className={buttonVariants({ variant: "primary" })}
-                to={"/login"}
-              >
-                <HugeiconsIcon icon={Login} />
-                Sign In
               </Link>
             </div>
           </div>

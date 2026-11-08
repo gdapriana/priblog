@@ -1,7 +1,12 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 import { QUERY_KEYS } from "../constants/query.keys.constant";
 import { buildQuery } from "../utils/query.utils";
-import type { ApiResponse, Blog, QueryResponse } from "../data/type.data";
+import type { Blog, CreateBlogInput, QueryResponse } from "../data/type.data";
 import type { orderBy } from "../utils/hook.utils";
 import { api } from "../utils/api.utils";
 
@@ -28,13 +33,12 @@ export const useQueryBlog = ({
   return useQuery({
     queryKey: [QUERY_KEYS.blogs.all, filter],
     queryFn: async () => {
-      const res = await api<ApiResponse<Blog>>(
+      return api<QueryResponse<Blog>>(
         `/api/blogs/query?${buildQuery(filter)}`,
         {
           method: "GET",
         },
       );
-      return res;
     },
     enabled,
   });
@@ -46,17 +50,25 @@ export const useGetBlog = ({
 }: {
   by: "id" | "slug";
   value: string;
-}): UseQueryResult<ApiResponse<Blog>, Error> => {
+}): UseQueryResult<Blog, Error> => {
   return useQuery({
     queryKey: [by, value],
     queryFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/blogs/get?${buildQuery({ by, value })}`,
-        {
-          method: "GET",
-        },
-      );
-      return res.json();
+      return api<Blog>(`/api/blogs/get?${buildQuery({ by, value })}`);
+    },
+  });
+};
+
+export const useCreateBlog = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["blog"],
+    mutationFn: async ({ body }: { body: CreateBlogInput }) => {
+      return api(`/api/blogs`, { method: "POST", body });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.blogs.all });
     },
   });
 };

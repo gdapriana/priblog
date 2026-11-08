@@ -28,7 +28,7 @@ import { useAuth } from "../../context/auth.context";
 import { ApiError } from "../../utils/api.utils";
 import type { RegisterInput } from "../../data/type.data";
 
-type FieldErrors = Partial<Record<keyof RegisterInput, string>>;
+type RegisterFieldErrors = Partial<Record<keyof RegisterInput, string>>;
 
 const RegisterAuthPage = () => {
   const [hidePassword, setHidePassword] = useState<boolean>(false);
@@ -56,30 +56,36 @@ const RegisterAuthPage = () => {
 
     toast.promise(register(form), {
       error: (e) => {
+        const map: RegisterFieldErrors = {};
         setLoading(false);
+        if (e instanceof Error && e.message) {
+          return e.message;
+        }
         if (e instanceof ApiError && e.errors) {
+          for (const issue of e.errors) {
+            map[issue.path as keyof RegisterInput] = issue.message;
+          }
+          setFieldErrors(map);
           return e.errors[0].message;
         }
         return "Something went wrong";
       },
       loading: "Loading...",
       success: () => {
+        setLoading(true);
         toast.promise(login({ email: form.email, password: form.password }), {
           success: () => {
             navigate("/");
             return "Success login";
           },
           error: (e) => {
-            const map: FieldErrors = {};
+            setLoading(false);
+            if (e instanceof Error && e.message) {
+              return e.message;
+            }
             if (e instanceof ApiError && e.errors) {
-              for (const issue of e.errors) {
-                map[issue.path as keyof RegisterInput] = issue.message;
-              }
-
-              setFieldErrors(map);
               return e.errors[0].message;
             }
-            setLoading(false);
             return "Something went wrong";
           },
           loading: "Please wait...",
