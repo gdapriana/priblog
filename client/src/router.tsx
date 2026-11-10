@@ -9,6 +9,7 @@ import Categoriespage from "./pages/categories.page";
 import { ProtectedRoute } from "./routes/protected.route";
 import CreateBlogpage from "./pages/create.blog.page";
 import Profilepage from "./pages/profile.page";
+import UpdateBlogPage from "./pages/update.blog.page";
 
 const router = createBrowserRouter([
   {
@@ -20,11 +21,11 @@ const router = createBrowserRouter([
       { path: "blogs/:slug", Component: BlogPage },
       {
         Component: ProtectedRoute,
-        children: [{ path: "create", Component: CreateBlogpage }],
-      },
-      {
-        Component: ProtectedRoute,
-        children: [{ path: "profile", Component: Profilepage }],
+        children: [
+          { path: "create", Component: CreateBlogpage },
+          { path: "blogs/:blogId/edit", Component: UpdateBlogPage },
+          { path: "profile", Component: Profilepage },
+        ],
       },
     ],
   },

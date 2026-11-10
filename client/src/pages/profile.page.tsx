@@ -3,22 +3,29 @@ import { useAuth } from "../context/auth.context";
 import { Navigate } from "react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Cog, SignOut } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LogoutAlert from "../components/partials/logout.alert";
-import { useQueryBlog } from "../hooks/use.blog.hook";
+import { type FilterBlog, useQueryBlog } from "../hooks/use.blog.hook";
 import type { Blog } from "../data/type.data";
 import BlogMainCard from "../components/partials/blog.main.card";
+import EmptyComponent from "../components/empty.component";
 
 const Profilepage = () => {
   const { user, status } = useAuth();
+  const [filterBlog, setFilterBlog] = useState<FilterBlog>({
+    take: 6,
+  });
   const { data: blogs, isLoading: blogsLoading } = useQueryBlog({
-    filter: {
-      userId: user?.id,
-      take: 6,
-    },
+    filter: filterBlog,
     enabled: user !== undefined,
   });
   const [openLogoutAlert, setOpenLogoutAlert] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (user) {
+      setFilterBlog((prev) => ({ ...prev, userId: user.id }));
+    }
+  }, [user]);
   if (status === "unauthenticated") <Navigate to={"/login?page=profile"} />;
   return (
     <main className="flex flex-col justify-start h-full items-stretch">
@@ -70,7 +77,13 @@ const Profilepage = () => {
           </Tabs.List>
         </Tabs.ListContainer>
         <Tabs.Panel className="p-6 md:p-8 flex-1" id="blog">
-          <div className="w-full h-full grid grid-cols-2 gap-4 sm:grid-cols-3 grid-rows-3 sm:grid-rows-2">
+          <div className="grid h-full gap-x-2 md:gap-x-4 gap-y-4 md:gap-y-6 grid-cols-2 md:grid-cols-3 relative">
+            {!blogsLoading && blogs && blogs.items.length === 0 && (
+              <EmptyComponent
+                name="Blog"
+                cta={{ text: "Create your first blog", url: "/create" }}
+              />
+            )}
             {blogs &&
               blogs.items &&
               blogs.items.map((item: Blog, idx: number) => (
@@ -81,11 +94,28 @@ const Profilepage = () => {
                 .fill(null)
                 .map((_, idx: number) => (
                   <div className="flex gap-4 flex-col justify-start items-stretch">
-                    <Skeleton key={idx} className="rounded-3xl w-full h-3/5" />
+                    <Skeleton
+                      key={idx}
+                      className="rounded-3xl w-full aspect-16/12"
+                    />
                     <Skeleton key={idx} className="rounded-3xl w-full h-2/12" />
                     <Skeleton key={idx} className="rounded-3xl w-full h-1/12" />
                   </div>
                 ))}
+          </div>
+          <div className="flex p-6 md:p-8 pt-10 md:pt-12 justify-center items-center">
+            {!blogsLoading && blogs && blogs.items.length !== 0 && (
+              <Button
+                isDisabled={!blogs.hasMore}
+                onClick={() => {
+                  if (blogs.hasMore) {
+                    setFilterBlog((prev) => ({ ...prev, take: prev.take + 3 }));
+                  }
+                }}
+              >
+                Load More
+              </Button>
+            )}
           </div>
         </Tabs.Panel>
         <Tabs.Panel className="pt-4" id="analytics">

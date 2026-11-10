@@ -11,6 +11,9 @@ import {
   Dropdown,
   Label,
   Separator,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@heroui/react";
 import { useAuth } from "./context/auth.context";
 import {
@@ -82,17 +85,26 @@ export const MainLayout = () => {
               </div>
 
               {user && status === "authenticated" && (
-                <div className="flex py-4 mt-auto mb-6 justify-start items-center gap-4">
-                  <Avatar>
+                <div className="flex p-4 w-full mt-auto mb-6 justify-start items-center gap-4">
+                  <Avatar size="sm">
                     <Avatar.Image
                       alt="Blue"
                       src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
                     />
                     <Avatar.Fallback>B</Avatar.Fallback>
                   </Avatar>
-                  <div className="flex flex-col justify-center items-start">
+                  <div className="flex flex-1 flex-col justify-center items-start">
                     <h4 className="font-bold capitalize">{user.name}</h4>
-                    <Description>{user.email}</Description>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Description>
+                          {user.email.length > 5
+                            ? user.email.substring(0, 10) + "..."
+                            : user.email}
+                        </Description>
+                      </TooltipTrigger>
+                      <TooltipContent>{user.email}</TooltipContent>
+                    </Tooltip>
                   </div>
                   <Dropdown>
                     <Button variant="ghost" isIconOnly aria-label="User menu">

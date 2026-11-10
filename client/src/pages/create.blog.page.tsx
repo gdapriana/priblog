@@ -49,12 +49,16 @@ import {
 import { type CreateBlogInput, type Category } from "../data/type.data";
 import { useCreateBlog } from "../hooks/use.blog.hook";
 import { useNavigate } from "react-router";
+import { CODE_BLOG_LANGS } from "../constants/code.blog.langs.constant";
+import { useMediaQuery } from "../hooks/use.media.query";
 
 const CreateBlogpage = () => {
   const [form, setForm] = useState<CreateBlogInput>({
     title: "",
     content: ">Your blog body here...",
   });
+
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [loading, setLoading] = useState<boolean>(false);
   const { mutateAsync } = useCreateBlog();
@@ -69,7 +73,7 @@ const CreateBlogpage = () => {
         error: "Something went wrong",
         loading: "Loading...",
         success: () => {
-          navigate("/blogs");
+          navigate("/profile");
           return "Blog created";
         },
       });
@@ -113,7 +117,9 @@ const CreateBlogpage = () => {
           ></TextArea>
 
           <div className="md:hidden">
-            <SelectCategory form={{ value: form, setValue: setForm }} />
+            {!isDesktop && (
+              <SelectCategory form={{ value: form, setValue: setForm }} />
+            )}
           </div>
         </div>
 
@@ -145,42 +151,7 @@ const CreateBlogpage = () => {
                 }),
                 codeBlockPlugin({ defaultCodeBlockLanguage: "ts" }),
                 codeMirrorPlugin({
-                  codeBlockLanguages: {
-                    ts: "TypeScript",
-                    js: "JavaScript",
-                    css: "CSS",
-                    tsx: "TSX",
-                    jsx: "JSX",
-                    html: "HTML",
-                    scss: "SCSS",
-                    less: "Less",
-                    vue: "Vue",
-                    json: "JSON",
-                    yaml: "YAML",
-                    toml: "TOML",
-                    xml: "XML",
-                    sql: "SQL",
-                    md: "Markdown",
-                    dockerfile: "Dockerfile",
-                    nginx: "Nginx",
-                    python: "Python",
-                    go: "Go",
-                    rust: "Rust",
-                    java: "Java",
-                    kotlin: "Kotlin",
-                    php: "PHP",
-                    ruby: "Ruby",
-                    swift: "Swift",
-                    c: "C",
-                    cpp: "C++",
-                    csharp: "C#",
-                    lua: "Lua",
-                    bash: "Bash",
-                    sh: "Shell",
-                    powershell: "PowerShell",
-                    diff: "Diff",
-                    txt: "Plain Text",
-                  },
+                  codeBlockLanguages: CODE_BLOG_LANGS,
                 }),
               ]}
             />
@@ -188,7 +159,9 @@ const CreateBlogpage = () => {
         </div>
       </div>
       <div className="hidden md:flex p-6 md:p-8">
-        <SelectCategory form={{ value: form, setValue: setForm }} />
+        {isDesktop && (
+          <SelectCategory form={{ value: form, setValue: setForm }} />
+        )}
       </div>
       <div className="flex gap-2 flex-col p-6 md:p-8 justify-center items-center">
         <Button variant="outline" type="button" fullWidth>

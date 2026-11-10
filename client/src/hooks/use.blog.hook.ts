@@ -47,15 +47,18 @@ export const useQueryBlog = ({
 export const useGetBlog = ({
   by,
   value,
+  enabled,
 }: {
   by: "id" | "slug";
   value: string;
+  enabled?: boolean;
 }): UseQueryResult<Blog, Error> => {
   return useQuery({
-    queryKey: [by, value],
+    queryKey: [by, value, QUERY_KEYS.blogs.all],
     queryFn: async () => {
       return api<Blog>(`/api/blogs/get?${buildQuery({ by, value })}`);
     },
+    enabled,
   });
 };
 
@@ -63,9 +66,41 @@ export const useCreateBlog = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ["blog"],
     mutationFn: async ({ body }: { body: CreateBlogInput }) => {
       return api(`/api/blogs`, { method: "POST", body });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.blogs.all });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+  });
+};
+
+export const useUpdateBlog = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      body,
+      blogId,
+    }: {
+      body: CreateBlogInput;
+      blogId: string;
+    }) => {
+      return api(`/api/blogs/${blogId}`, { method: "PATCH", body });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.blogs.all });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+  });
+};
+
+export const useDeleteBlog = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["blog", QUERY_KEYS.blogs.all],
+    mutationFn: async ({ blogId }: { blogId: string }) => {
+      return api(`/api/blogs/${blogId}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.blogs.all });

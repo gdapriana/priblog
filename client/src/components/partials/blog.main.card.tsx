@@ -11,12 +11,16 @@ const BlogMainCard = ({ blog }: { blog: Blog }) => {
       <article className="w-full h-full flex flex-col gap-4 justify-start blogs-stretch">
         <div
           className={cn(
-            "h-3/5 flex justify-center items-center rounded-3xl overflow-hidden",
+            "aspect-16/12 flex justify-center items-center rounded-3xl overflow-hidden",
             !blog.cover && "border border-foreground/10",
           )}
         >
           {blog.cover ? (
-            <img src={blog.cover} alt="cover" />
+            <img
+              src={blog.cover}
+              alt="cover"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <HugeiconsIcon icon={ImageOff} className="text-foreground/10" />
           )}
