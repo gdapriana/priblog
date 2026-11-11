@@ -21,7 +21,7 @@ export const useQueryCategory = ({
   filter?: FilterCategory;
 } = {}): UseQueryResult<QueryResponse<Category>, Error> => {
   return useQuery({
-    queryKey: [QUERY_KEYS.categories.all, filter],
+    queryKey: [...QUERY_KEYS.categories.all, filter],
     queryFn: async () => {
       const res = await api<QueryResponse<Category>>(
         `/api/categories/query?${buildQuery(filter)}`,

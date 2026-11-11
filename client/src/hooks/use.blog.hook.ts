@@ -31,7 +31,7 @@ export const useQueryBlog = ({
   enabled?: boolean;
 } = {}): UseQueryResult<QueryResponse<Blog>, Error> => {
   return useQuery({
-    queryKey: [QUERY_KEYS.blogs.all, filter],
+    queryKey: [...QUERY_KEYS.blogs.all, filter],
     queryFn: async () => {
       return api<QueryResponse<Blog>>(
         `/api/blogs/query?${buildQuery(filter)}`,
@@ -54,7 +54,7 @@ export const useGetBlog = ({
   enabled?: boolean;
 }): UseQueryResult<Blog, Error> => {
   return useQuery({
-    queryKey: [by, value, QUERY_KEYS.blogs.all],
+    queryKey: [by, value, ...QUERY_KEYS.blogs.all],
     queryFn: async () => {
       return api<Blog>(`/api/blogs/get?${buildQuery({ by, value })}`);
     },

@@ -17,7 +17,7 @@ const Profilepage = () => {
   });
   const { data: blogs, isLoading: blogsLoading } = useQueryBlog({
     filter: filterBlog,
-    enabled: user !== undefined,
+    enabled: !!user,
   });
   const [openLogoutAlert, setOpenLogoutAlert] = useState<boolean>(false);
 
@@ -26,7 +26,8 @@ const Profilepage = () => {
       setFilterBlog((prev) => ({ ...prev, userId: user.id }));
     }
   }, [user]);
-  if (status === "unauthenticated") <Navigate to={"/login?page=profile"} />;
+  if (status === "unauthenticated")
+    return <Navigate to={"/login?page=profile"} />;
   return (
     <main className="flex flex-col justify-start h-full items-stretch">
       <div className="px-6 py-12 md:px-8 md:py-12 gap-4 flex justify-center items-center flex-col">
@@ -93,11 +94,11 @@ const Profilepage = () => {
               Array(6)
                 .fill(null)
                 .map((_, idx: number) => (
-                  <div className="flex gap-4 flex-col justify-start items-stretch">
-                    <Skeleton
-                      key={idx}
-                      className="rounded-3xl w-full aspect-16/12"
-                    />
+                  <div
+                    key={idx}
+                    className="flex gap-4 flex-col justify-start items-stretch"
+                  >
+                    <Skeleton className="rounded-3xl w-full aspect-16/12" />
                     <Skeleton key={idx} className="rounded-3xl w-full h-2/12" />
                     <Skeleton key={idx} className="rounded-3xl w-full h-1/12" />
                   </div>
