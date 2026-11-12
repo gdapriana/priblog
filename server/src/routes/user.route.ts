@@ -7,6 +7,7 @@ const userRoute = Router();
 userRoute.post("/register", UserController.REGISTER);
 userRoute.post("/login", UserController.LOGIN);
 userRoute.delete("/logout", UserController.LOGOUT);
+userRoute.patch("/", requireAuth, UserController.UPDATE);
 userRoute.get("/me", requireAuth, UserController.ME);
 
 export default userRoute;

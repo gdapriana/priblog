@@ -15,4 +15,10 @@ export class UserValidation {
       password: z.string().min(1).max(1000),
     })
     .strict();
+  static UPDATE = z
+    .object({
+      name: z.string().trim().min(1).max(200).optional(),
+      userId: z.coerce.number(),
+    })
+    .strict();
 }

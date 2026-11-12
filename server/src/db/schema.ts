@@ -125,6 +125,7 @@ export type InsertCategory = typeof categories.$inferInsert;
 export type InsertSession = typeof sessions.$inferInsert;
 
 export type UserRegisterResponse = Omit<User, "hashedPassword">;
+export type UserUserUpdateResponse = Pick<User, "id">;
 export type UserLoginResponse = Omit<User, "hashedPassword">;
 export type UserLogoutResponse = Pick<User, "id">;
 export type UserMeResponse = Pick<User, "id" | "name" | "email" | "role">;

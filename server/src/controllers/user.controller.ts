@@ -1,9 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  UserLogoutResponse,
-  UserMeResponse,
-  UserRegisterResponse,
-} from "../db/schema.js";
+import { UserMeResponse, UserRegisterResponse } from "../db/schema.js";
 import { UserService } from "../services/user/user.service.js";
 import { ApiResponse } from "../utils/api.response.util.js";
 import {
@@ -35,6 +31,19 @@ export class UserController {
       next(e);
     }
   };
+
+  static UPDATE = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await UserService.UPDATE({
+        body: req.body,
+        userId: req.user?.id!,
+      });
+      ApiResponse.Success(res, CRUD_MESSAGE.updated("user"), result);
+    } catch (e) {
+      next(e);
+    }
+  };
+
   static LOGOUT = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await UserService.LOGOUT(req, res);

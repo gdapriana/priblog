@@ -89,3 +89,7 @@ export interface CreateBlogInput {
   excerpt?: string | null | undefined;
   content?: string | null | undefined;
 }
+
+export interface UpdateUserInput {
+  name?: string;
+}
