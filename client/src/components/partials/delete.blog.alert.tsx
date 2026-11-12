@@ -21,7 +21,14 @@ const DeleteBlogALert = ({
   });
 
   if (status === "unauthenticated") return;
-  if (status === "authenticated" && blog && blog.userId !== user.id) return;
+  if (
+    status === "authenticated" &&
+    blog &&
+    blog.userId &&
+    user &&
+    blog.userId !== user.id
+  )
+    return;
   if (loadingGetBlog) return <div>Loading...</div>;
 
   return (
@@ -35,7 +42,7 @@ const DeleteBlogALert = ({
               <AlertDialog.Heading>Delete Blog</AlertDialog.Heading>
             </AlertDialog.Header>
             <AlertDialog.Body>
-              <p>Are you sure you want to delete {blog.title}?</p>
+              <p>Are you sure you want to delete {blog?.title}?</p>
             </AlertDialog.Body>
             <AlertDialog.Footer>
               <Button slot="close" variant="tertiary">

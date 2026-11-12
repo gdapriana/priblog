@@ -61,7 +61,7 @@ const UpdateBlogpage = () => {
 
   const { data: blog, isLoading: loadingGetBlog } = useGetBlog({
     by: "id",
-    value: blogId,
+    value: blogId ?? "",
     enabled: !!blogId,
   });
 
@@ -108,7 +108,7 @@ const UpdateBlogpage = () => {
   }, [blog]);
 
   if (loadingGetBlog) return <main>Loading...</main>;
-  if (!blog || blog.userId !== user.id) return <NotFoundComponent />;
+  if (!blog || (user && blog.userId !== user.id)) return <NotFoundComponent />;
 
   return (
     <Form
@@ -141,7 +141,7 @@ const UpdateBlogpage = () => {
               setForm((prev) => ({ ...prev, excerpt: val.target.value }))
             }
             placeholder="Excerpt for blog..."
-            value={form.excerpt}
+            value={form.excerpt as any}
             className="border-0 bg-transparent text-muted h-auto focus:ring-0 rounded-md"
           ></TextArea>
 

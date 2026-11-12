@@ -124,7 +124,7 @@ const Profilepage = () => {
                     if (blogs.hasMore) {
                       setFilterBlog((prev) => ({
                         ...prev,
-                        take: prev.take + 3,
+                        take: prev.take && prev.take + 3,
                       }));
                     }
                   }}
