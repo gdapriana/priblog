@@ -81,7 +81,7 @@ const UpdateBlogpage = () => {
     setLoading(true);
 
     try {
-      toast.promise(mutateAsync({ body: form, blogId: blogId }), {
+      toast.promise(mutateAsync({ body: form, blogId: blogId ?? "" }), {
         error: "Something went wrong",
         loading: "Loading...",
         success: () => {
