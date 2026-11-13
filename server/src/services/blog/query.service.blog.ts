@@ -12,13 +12,16 @@ import {
   ilike,
   lt,
   or,
+  sql,
 } from "drizzle-orm";
 import db from "../../configs/db.js";
 import {
   Blog,
   BlogQueryResponse,
   blogs,
+  blogsToTags,
   categories,
+  tags,
   users,
   type QueryResponse,
 } from "../../db/schema.js";
@@ -119,6 +122,14 @@ export const queryServiceBlog = async (
           email: users.email,
           name: users.name,
         },
+        tags: sql<{ id: string; title: string; slug: string }[]>`
+          coalesce(
+            json_agg(
+              json_build_object('id', ${tags.id}, 'title', ${tags.title}, 'slug', ${tags.slug})
+            ) filter (where ${tags.id} is not null),
+             '[]'
+          )
+        `,
       })
       .from(blogs)
       .where(
@@ -132,7 +143,10 @@ export const queryServiceBlog = async (
       .orderBy(direction(sortColumn), direction(blogs.id))
       .limit(take + 1)
       .leftJoin(categories, eq(blogs.categoryId, categories.id))
-      .leftJoin(users, eq(blogs.userId, users.id)),
+      .leftJoin(users, eq(blogs.userId, users.id))
+      .leftJoin(blogsToTags, eq(blogs.id, blogsToTags.blogId))
+      .leftJoin(tags, eq(tags.id, blogsToTags.tagId))
+      .groupBy(blogs.id, categories.id, users.id),
     withTotal && !cursor
       ? db.select({ total: count() }).from(blogs).where(searchCondition)
       : null,

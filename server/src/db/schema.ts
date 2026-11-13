@@ -4,6 +4,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -85,8 +86,23 @@ export const categories = pgTable(
   ],
 );
 
+export const tags = pgTable("tags", {
+  slug: varchar("slug", { length: 500 }).unique(),
+  title: varchar("title", { length: 300 }).notNull(),
+  ...defaultField,
+});
+
+export const blogsToTags = pgTable(
+  "blogs_to_tags",
+  {
+    blogId: integer("blog_id").notNull(),
+    tagId: integer("tag_id").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.blogId, t.tagId] })],
+);
+
 export const relations = defineRelations(
-  { users, blogs, categories, sessions },
+  { users, blogs, categories, sessions, tags, blogsToTags },
   (r) => ({
     blogs: {
       user: r.one.users({
@@ -96,6 +112,10 @@ export const relations = defineRelations(
       blogs: r.one.categories({
         from: r.blogs.categoryId,
         to: r.categories.id,
+      }),
+      tags: r.many.tags({
+        from: r.blogs.id.through(r.blogsToTags.blogId),
+        to: r.tags.id.through(r.blogsToTags.tagId),
       }),
     },
     users: {
@@ -111,6 +131,9 @@ export const relations = defineRelations(
         to: r.users.id,
       }),
     },
+    tags: {
+      blogs: r.many.blogs(),
+    },
   }),
 );
 
@@ -119,10 +142,12 @@ export type UserRole = (typeof userRole.enumValues)[number];
 export type Blog = typeof blogs.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
+export type Tag = typeof tags.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type InsertBlog = typeof blogs.$inferInsert;
 export type InsertCategory = typeof categories.$inferInsert;
 export type InsertSession = typeof sessions.$inferInsert;
+export type InsertTag = typeof tags.$inferInsert;
 
 export type UserRegisterResponse = Omit<User, "hashedPassword">;
 export type UserUserUpdateResponse = Pick<User, "id">;
@@ -137,6 +162,7 @@ export type CategoryDeleteResponse = Pick<Category, "id">;
 export type BlogGetResponse = Blog & {
   category: Pick<Category, "id" | "title" | "slug"> | null;
   user: Pick<User, "name" | "id" | "email"> | null;
+  tags: Pick<Tag, "id" | "title" | "slug">[];
 };
 export type BlogQueryResponse = Blog & {
   category: Pick<Category, "id" | "title" | "slug"> | null;
